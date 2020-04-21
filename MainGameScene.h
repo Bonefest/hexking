@@ -50,10 +50,14 @@ public:
         m_ptempHexDrawer->clear();
 
         for(int x = -2; x <= 2; x++) {
-            for(int y = -2;y <= 2; y++) {
-                auto hex = hexagon(cubeToRect(cocos2d::Vec2(x + 3, y + 1), 24.0f), 24.0f);
-                //m_ptempHexDrawer->drawSolidPoly(hex.data(), 6, cocos2d::Color4F::YELLOW);
-                m_ptempHexDrawer->drawPoly(hex.data(), 6, true, cocos2d::Color4F::WHITE);
+            for(int y = -3;y <= 3; y++) {
+
+                if((y == 1 && x == 2) ||
+                   (y == -1 && x == -1)) continue;
+
+                auto hex = hexagon(cubeToRect(cocos2d::Vec2(x + 3, y + 2), 24.0f), 24.0f);
+                m_ptempHexDrawer->drawPolygon(hex.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, 0.1f), 2.0f, cocos2d::Color4F::WHITE);
+
             }
         }
     }
