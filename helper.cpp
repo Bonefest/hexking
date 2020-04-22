@@ -48,7 +48,7 @@ namespace hk {
     }
 
     cocos2d::Vec2 roundHex(cocos2d::Vec2 hex) {
-        cubeToHex(roundCube(hexToCube(hex)));
+        return cubeToHex(roundCube(hexToCube(hex)));
     }
 
 
@@ -56,7 +56,6 @@ namespace hk {
         float q = (2.0f / 3.0f) * pixelPosition.x / hexSize;
         float r = ((-1.0 / 3.0) * pixelPosition.x +
                   std::sqrt(3.0f)/3.0f * pixelPosition.y) / hexSize;
-
         return roundHex(cocos2d::Vec2(q, r));
     }
 
@@ -68,7 +67,7 @@ namespace hk {
         std::vector<cocos2d::Vec2> vertices;
         for(int i = 0; i < 6; ++i) {
             vertices.push_back(cocos2d::Vec2(std::cos(radians(i * 60.0f)),
-                                             std::sin(radians(i * 60.0f))) + position);
+                                             std::sin(radians(i * 60.0f))) * size + position);
         }
 
         return vertices;

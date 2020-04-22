@@ -78,7 +78,7 @@ namespace hk {
                 switch(ed.first) {
                     case event_code::BEGAN: {
                         //TEST
-                        cocos2d::log("%f %f", ed.second.getLocation().x, ed.second.getLocation().y);
+                        auto a = rectToHexCoords(ed.second.getLocation(), 24.0f);
                         entt::entity hexagon = registry.create();
                         registry.assign<HexagonView>(hexagon,
                                                      rectToHexCoords(ed.second.getLocation(), 24.0f),
