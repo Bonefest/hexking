@@ -8,14 +8,14 @@ namespace hk {
 
     class ISystem {
     public:
-        void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) { }
-        void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) { }
-        void onExit(entt::registry& registry, entt::dispatcher& dispatcher) { }
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) { }
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) { }
+        virtual void onExit(entt::registry& registry, entt::dispatcher& dispatcher) { }
     };
 
     class HexagonRenderingSystem: public ISystem {
-        void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
-            cocos2d::log("here");
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+
         }
     };
 

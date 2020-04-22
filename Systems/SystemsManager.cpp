@@ -16,7 +16,6 @@ void SystemsManager::updateSystems(float delta) {
 
     for(auto system: poppedSystems) {
 
-        cocos2d::log("here");
         system.second->update(m_registry, m_dispatcher, delta);
         m_systems.push(system);
     }
@@ -24,4 +23,5 @@ void SystemsManager::updateSystems(float delta) {
 
 void SystemsManager::addSystem(shared_ptr<ISystem> system, int priority) {
     m_systems.push(prioritized_system{priority, system});
+    system->onEnter(m_registry, m_dispatcher);
 }
