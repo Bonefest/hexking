@@ -7,24 +7,7 @@
 #include "Systems/System.h"
 #include "Systems/SystemsManager.h"
 
-cocos2d::Vec2 cubeToRect(cocos2d::Vec2 position, float size) {
-    cocos2d::Vec2 result(cocos2d::Vec2::ZERO);
-    result.x += std::round(position.x) * 1.5f * size;
-    result.y += std::round(position.x) * 0.5f * std::sqrt(3) * size;
-
-    result.y += std::round(position.y) * std::sqrt(3) * size;
-
-    return result;
-}
-
-std::vector<cocos2d::Vec2> hexagon(cocos2d::Vec2 position, float size) {
-    std::vector<cocos2d::Vec2> vertices;
-    for(int i = 0;i < 6; ++i) {
-        vertices.push_back(cocos2d::Vec2(std::cos(radians(i * 60.0f)),
-                                         std::sin(radians(i * 60.0f))) * size + position);
-    }
-    return vertices;
-}
+#include "Components/Components.h"
 
 class MainGameScene: public cocos2d::Scene {
 public:
@@ -38,22 +21,36 @@ public:
             return false;
         }
 
-        m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>());
 
-        m_ptempHexDrawer = cocos2d::DrawNode::create();
-        addChild(m_ptempHexDrawer);
+        runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
+
 
         scheduleUpdate();
         return true;
     }
 
+    void postInit() {
+        initContext();
+        initSystems();
+    }
+
+    void initContext() {
+        hk::GameData gameData;
+
+        gameData.hexagonSize = 24.0f;
+        gameData.lineWidth = 2.0f;
+        gameData.releasedTime = 0.0f;
+
+        m_manager.getRegistry().set<hk::GameData>(gameData);
+    }
+
+    void initSystems() {
+        m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
+        m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
+    }
 
     void update(float delta) {
         m_manager.updateSystems(delta);
-
-        m_ptempHexDrawer->clear();
-        auto hex = hexagon(cubeToRect(cocos2d::Vec2(0.0f, 0.0f), 24.0f), 24.0f);
-        m_ptempHexDrawer->drawPolygon(hex.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, 0.1f), 2.0f, cocos2d::Color4F::WHITE);
     }
 private:
     cocos2d::DrawNode* m_ptempHexDrawer;

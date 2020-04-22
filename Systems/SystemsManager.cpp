@@ -6,6 +6,14 @@ using std::pair;
 
 #include <list>
 
+entt::registry& SystemsManager::getRegistry() {
+    return m_registry;
+}
+
+entt::dispatcher& SystemsManager::getDispatcher() {
+    return m_dispatcher;
+}
+
 void SystemsManager::updateSystems(float delta) {
     std::list<prioritized_system> poppedSystems;
 

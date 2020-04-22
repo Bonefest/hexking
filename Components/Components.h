@@ -9,6 +9,14 @@ namespace hk {
     enum class HexagonStatus { ACTIVE, UNACTIVE };
 
     struct HexagonView {
+        explicit HexagonView(cocos2d::Vec2 t_hexCoordinate,
+                             cocos2d::Color4F t_fillColor,
+                             cocos2d::Color4F t_borderColor,
+                             HexagonStatus t_status = HexagonStatus::ACTIVE): coordinate(t_hexCoordinate),
+                                                                              fillColor(t_fillColor),
+                                                                              borderColor(t_borderColor),
+                                                                              status(t_status) { }
+
         cocos2d::Vec2 coordinate;
 
         cocos2d::Color4F fillColor;

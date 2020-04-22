@@ -18,6 +18,9 @@ namespace hk {
         void addSystem(std::shared_ptr<ISystem> system, int priority = 0);
         void removeSystem(std::shared_ptr<ISystem> system) { /* TODO */ }
 
+        entt::registry& getRegistry();
+        entt::dispatcher& getDispatcher();
+
     private:
         entt::registry m_registry;
         entt::dispatcher m_dispatcher;
