@@ -4,6 +4,9 @@
 #include "cocos2d.h"
 #include <vector>
 
+#include "Systems/System.h"
+#include "Systems/SystemsManager.h"
+
 float radians(float degrees) {
     return M_PI / 180.0f * degrees;
 }
@@ -38,6 +41,9 @@ public:
         if(!cocos2d::Scene::init()) {
             return false;
         }
+
+        m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>());
+
         m_ptempHexDrawer = cocos2d::DrawNode::create();
         addChild(m_ptempHexDrawer);
 
@@ -47,23 +53,15 @@ public:
 
 
     void update(float delta) {
+        m_manager.updateSystems(delta);
+
         m_ptempHexDrawer->clear();
-
-        for(int x = -2; x <= 2; x++) {
-            for(int y = -3;y <= 3; y++) {
-
-                if((y == 1 && x == 2) ||
-                   (y == -1 && x == -1)) continue;
-
-                auto hex = hexagon(cubeToRect(cocos2d::Vec2(x + 3, y + 2), 24.0f), 24.0f);
-                m_ptempHexDrawer->drawPolygon(hex.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, 0.1f), 2.0f, cocos2d::Color4F::WHITE);
-
-            }
-        }
+        auto hex = hexagon(cubeToRect(cocos2d::Vec2(0.0f, 0.0f), 24.0f), 24.0f);
+        m_ptempHexDrawer->drawPolygon(hex.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, 0.1f), 2.0f, cocos2d::Color4F::WHITE);
     }
-
 private:
     cocos2d::DrawNode* m_ptempHexDrawer;
+    hk::SystemsManager m_manager;
 };
 
 #endif // MAINGAMESCENE_H_INCLUDED

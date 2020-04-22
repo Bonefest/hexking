@@ -4,41 +4,45 @@
 #include "cocos2d.h"
 #include <vector>
 
-enum class HexagonStatus { ACTIVE, UNACTIVE };
+namespace hk {
 
-struct HexagonModel {
-    cocos2d::Vec2 coordinate;
+    enum class HexagonStatus { ACTIVE, UNACTIVE };
 
-    cocos2d::Color4F fillColor;
-    cocos2d::Color4F borderColor;
+    struct HexagonModel {
+        cocos2d::Vec2 coordinate;
 
-    HexagonStatus status;
-};
+        cocos2d::Color4F fillColor;
+        cocos2d::Color4F borderColor;
 
-enum class HexagonType { ATTACKER, DEFENSER, WORKER };
+        HexagonStatus status;
+    };
 
-struct HexagonData {
-    HexagonType type;
-    int level;
-    float damage;
-    float defense;
-    float income;
+    enum class HexagonType { ATTACKER, DEFENSER, WORKER };
 
-    float currentHp;
+    struct HexagonData {
+        HexagonType type;
+        int level;
+        float damage;
+        float defense;
+        float income;
 
-    bool fighting;
-};
+        float currentHp;
 
-struct PlayerData {
-    cocos2d::Color4F color;
-    int resources;
-    std::vector<cocos2d::Vec2> capturedCells;
-};
+        bool fighting;
+    };
 
-struct GameData {
-    float hexagonSize;
-    float releasedTime;
-};
+    struct PlayerData {
+        cocos2d::Color4F color;
+        int resources;
+        std::vector<cocos2d::Vec2> capturedCells;
+    };
+
+    struct GameData {
+        float hexagonSize;
+        float releasedTime;
+    };
+
+}
 
 //TODO Events: onHexagonTouched, onHexagonReleased, onHexagonCanceled
 
