@@ -7,10 +7,6 @@
 #include "Systems/System.h"
 #include "Systems/SystemsManager.h"
 
-float radians(float degrees) {
-    return M_PI / 180.0f * degrees;
-}
-
 cocos2d::Vec2 cubeToRect(cocos2d::Vec2 position, float size) {
     cocos2d::Vec2 result(cocos2d::Vec2::ZERO);
     result.x += std::round(position.x) * 1.5f * size;

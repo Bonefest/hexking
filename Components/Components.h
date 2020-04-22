@@ -8,7 +8,7 @@ namespace hk {
 
     enum class HexagonStatus { ACTIVE, UNACTIVE };
 
-    struct HexagonModel {
+    struct HexagonView {
         cocos2d::Vec2 coordinate;
 
         cocos2d::Color4F fillColor;
@@ -39,6 +39,7 @@ namespace hk {
 
     struct GameData {
         float hexagonSize;
+        float lineWidth;
         float releasedTime;
     };
 
