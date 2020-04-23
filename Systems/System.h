@@ -32,21 +32,25 @@ namespace hk {
 
             GameData& gameData = registry.ctx<GameData>();
 
-            registry.view<HexagonView>().each([&](entt::entity hexagon, HexagonView& view){
+            registry.view<Hexagon>().each([&](entt::entity entity, Hexagon& hexagon){
                 auto vertices = generateHexagonVertices(gameData.hexagonSize,
-                                                        hexToRectCoords(view.coordinate, gameData.hexagonSize));
+                                                        hexToRectCoords(hexagon.position, gameData.hexagonSize));
 
-                if(!registry.has<HexagonData>(hexagon)) {
+                if(hexagon.team == Team::NO_TEAM) {
                     m_renderer->drawPoly(vertices.data(),
                                             6,
                                             true,
-                                            view.borderColor);
+                                            cocos2d::Color4F::WHITE);
                 } else {
+                    auto fillColor = getTeamColor(hexagon.team);
+                    auto borderColor = fillColor;
+                    borderColor.a = 0.5f;
+
                     m_renderer->drawPolygon(vertices.data(),
                                             6,
-                                            view.fillColor,
+                                            fillColor,
                                             1.0f,
-                                            view.borderColor);
+                                            borderColor);
                 }
 
             });
@@ -84,16 +88,7 @@ namespace hk {
             for(event_data ed : m_unprocessedEvents) {
                 switch(ed.first) {
                     case event_code::BEGAN: {
-                        std::vector<entt::entity> test;
-                        registry.view<HexagonView>().each([&](entt::entity entity, HexagonView& v){
-                            test.push_back(entity);
-                        });
 
-                        if(!test.empty() && registry.valid(test[0])) {
-                            cocos2d::log("%u", test.size());
-                            registry.destroy(test[0]);
-                        }
-                        break;
                     }
 
 

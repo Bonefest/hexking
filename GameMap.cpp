@@ -8,6 +8,12 @@ namespace hk {
         }
     }
 
+    void GameMap::setHexagon(cocos2d::Vec2 hex, entt::entity hexagon) {
+        if(isOutOfBounds(hex)) return;
+
+        m_gameMap[getIndex(hex)] = hexagon;
+    }
+
     entt::entity GameMap::getHexagon(cocos2d::Vec2 hex) {
         if(isOutOfBounds(hex)) return entt::null;
 

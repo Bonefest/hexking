@@ -76,4 +76,15 @@ namespace hk {
     cocos2d::Size calculateHexSize(float size) {
         return cocos2d::Size(2.0f * size, std::sqrt(3) * size);
     }
+
+    cocos2d::Color4F getTeamColor(Team team) {
+        switch(team) {
+        case Team::TEAM_1: return cocos2d::Color4F::RED;
+        case Team::TEAM_2: return cocos2d::Color4F::GREEN;
+        case Team::TEAM_3: return cocos2d::Color4F::BLUE;
+        case Team::TEAM_4: return cocos2d::Color4F::YELLOW;
+        }
+
+        return cocos2d::Color4F::WHITE;
+    }
 }

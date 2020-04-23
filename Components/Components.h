@@ -4,47 +4,35 @@
 #include "cocos2d.h"
 #include <vector>
 
-#include "HexagonNode.h"
+#include "../Dependencies/entt.hpp"
 
 namespace hk {
 
-    enum class HexagonStatus { ACTIVE, UNACTIVE };
+    enum class Role { ATTACKER, DEFENSER, WORKER };
+    enum class Team { TEAM_1, TEAM_2, TEAM_3, TEAM_4, NO_TEAM };
 
-    struct HexagonView {
-        explicit HexagonView(cocos2d::Vec2 t_hexCoordinate,
-                             cocos2d::Color4F t_fillColor,
-                             cocos2d::Color4F t_borderColor,
-                             HexagonStatus t_status = HexagonStatus::ACTIVE): coordinate(t_hexCoordinate),
-                                                                              fillColor(t_fillColor),
-                                                                              borderColor(t_borderColor),
-                                                                              status(t_status) { }
+    struct Hexagon {
+        explicit Hexagon(cocos2d::Vec2 t_position, Team t_team = Team::NO_TEAM): position(t_position),
+                                                                                 team(t_team) { }
+        cocos2d::Vec2 position;
 
-        cocos2d::Vec2 coordinate;
-
-        cocos2d::Color4F fillColor;
-        cocos2d::Color4F borderColor;
-
-        HexagonStatus status;
+        Team team;
     };
-
-    enum class HexagonType { ATTACKER, DEFENSER, WORKER };
 
     struct HexagonData {
-        HexagonType type;
-        int level;
-        float damage;
-        float defense;
-        float income;
+        Role role;
 
+        float hp;
         float currentHp;
 
-        bool fighting;
+        float damage;
+        float income;
     };
 
-    struct PlayerData {
-        cocos2d::Color4F color;
+    struct Player {
+        Team team;
         int resources;
-        std::vector<cocos2d::Vec2> capturedCells;
+        std::vector<entt::entity> capturedCells;
     };
 
     struct GameData {

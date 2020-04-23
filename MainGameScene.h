@@ -63,7 +63,8 @@ public:
                 if(rand() % 2) continue;
 
                 entt::entity hexagon = registry.create();
-                registry.assign<hk::HexagonView>(hexagon, cocos2d::Vec2(x, y), cocos2d::Color4F::WHITE, cocos2d::Color4F::WHITE);
+                registry.assign<hk::Hexagon>(hexagon, cocos2d::Vec2(x, y));
+                gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
             }
         }
     }

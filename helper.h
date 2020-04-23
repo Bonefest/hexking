@@ -2,6 +2,7 @@
 #define HELPER_H_INCLUDED
 
 #include "cocos2d.h"
+#include "Components/Components.h"
 
 namespace hk {
 
@@ -25,6 +26,8 @@ namespace hk {
     std::vector<cocos2d::Vec2> generateHexagonVertices(float size, cocos2d::Vec2 position);
 
     cocos2d::Size calculateHexSize(float size);
+
+    cocos2d::Color4F getTeamColor(Team team);
 }
 
 #endif // HELPER_H_INCLUDED
