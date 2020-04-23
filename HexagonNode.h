@@ -31,13 +31,13 @@ namespace hk {
             m_gradient->setVector(cocos2d::Vec2(0, 1));
 
             m_clipper = cocos2d::ClippingNode::create();
+            m_clipper->setStencil(m_stencil);
             m_clipper->addChild(m_gradient);
 
             setHexagonSize(size);
             setColor(cocos2d::Color3B::WHITE);
 
-            addChild(m_stencil);
-            addChild(m_borderRenderer);
+            addChild(m_borderRenderer, 1);
             addChild(m_clipper);
 
             return true;
@@ -45,7 +45,6 @@ namespace hk {
 
         virtual void setColor(const cocos2d::Color3B& color) {
             m_hexagonColor = color;
-            cocos2d::log("here");
             calculateGradient();
         }
 
@@ -53,28 +52,28 @@ namespace hk {
             cocos2d::Node::draw(renderer, mat, flag);
 
             m_borderRenderer->clear();
-            auto vertices = generateHexagonVertices(m_hexagonSize, getPosition());
-            m_borderRenderer->drawPoly(vertices.data(), 6, true, cocos2d::Color4F::GRAY);
+            auto vertices = generateHexagonVertices(m_hexagonSize, getContentSize() * 0.5f);
+            m_borderRenderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.0f, 0.0f, 0.0f, 0.0f), 2.0f, cocos2d::Color4F(m_hexagonColor, 0.5f));
 
         }
 
         void setHexagonSize(float size) {
             m_hexagonSize = size;
             setContentSize(calculateHexSize(size));
-            calculateHexagonView();
+            m_gradient->setContentSize(getContentSize());
+            calculateHexagonStencil();
         }
 
     private:
-        void calculateHexagonView() {
+        void calculateHexagonStencil() {
             m_stencil->clear();
             auto vertices = generateHexagonVertices(m_hexagonSize, getContentSize() * 0.5f);
             m_stencil->drawPolygon(vertices.data(), 6, cocos2d::Color4F::WHITE, 0.0f, cocos2d::Color4F::WHITE);
-            m_clipper->setStencil(m_stencil);
         }
 
         void calculateGradient() {
             m_gradient->setStartColor(m_hexagonColor);
-            m_gradient->setEndColor(cocos2d::Color3B::RED);
+            m_gradient->setEndColor(m_hexagonColor);
             m_gradient->setStartOpacity(128);
             m_gradient->setEndOpacity(255);
         }
