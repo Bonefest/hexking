@@ -21,30 +21,11 @@ namespace hk {
 
     class HexagonRenderingSystem: public ISystem {
     public:
-        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
-            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
-            m_renderer = cocos2d::DrawNode::create();
-            runningScene->addChild(m_renderer);
-        }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
-            m_renderer->clear();
 
-            GameData& gameData = registry.ctx<GameData>();
-
-            registry.view<HexagonView>().each([&](entt::entity hexagon, HexagonView& view){
-                auto vertices = generateHexagonVertices(gameData.hexagonSize,
-                                                        hexToRectCoords(view.coordinate, gameData.hexagonSize));
-
-                m_renderer->drawPoly(vertices.data(),
-                                        6,
-                                        true,
-                                        cocos2d::Color4F::GRAY);
-            });
         }
 
-    private:
-        cocos2d::DrawNode* m_renderer;
 
         /*
             ? Loading hexagon vertices once and every frame controlling hexagon size. On resizing - recalculating model. ?
@@ -76,14 +57,7 @@ namespace hk {
             for(event_data ed : m_unprocessedEvents) {
                 switch(ed.first) {
                     case event_code::BEGAN: {
-                        //TEST
 
-                        auto a = rectToHexCoords(ed.second.getLocation(), 24.0f);
-                        entt::entity hexagon = registry.create();
-                        registry.assign<HexagonView>(hexagon,
-                                                     rectToHexCoords(ed.second.getLocation(), 24.0f),
-                                                     cocos2d::Color4F::WHITE,
-                                                     cocos2d::Color4F::GRAY);
 
                         break;
                     }

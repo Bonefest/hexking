@@ -24,6 +24,8 @@ namespace hk {
         bool initWithHexSize(float size) {
             if(!cocos2d::Node::init()) return false;
 
+            setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+
             m_stencil = cocos2d::DrawNode::create();
             m_borderRenderer = cocos2d::DrawNode::create();
 
@@ -31,6 +33,7 @@ namespace hk {
             m_gradient->setVector(cocos2d::Vec2(0, 1));
 
             m_clipper = cocos2d::ClippingNode::create();
+            m_clipper->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
             m_clipper->setStencil(m_stencil);
             m_clipper->addChild(m_gradient);
 
@@ -52,7 +55,7 @@ namespace hk {
             cocos2d::Node::draw(renderer, mat, flag);
 
             m_borderRenderer->clear();
-            auto vertices = generateHexagonVertices(m_hexagonSize, getContentSize() * 0.5f);
+            auto vertices = generateHexagonVertices(m_hexagonSize, cocos2d::Vec2::ZERO);
             m_borderRenderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.0f, 0.0f, 0.0f, 0.0f), 2.0f, cocos2d::Color4F(m_hexagonColor, 0.5f));
 
         }
@@ -61,13 +64,14 @@ namespace hk {
             m_hexagonSize = size;
             setContentSize(calculateHexSize(size));
             m_gradient->setContentSize(getContentSize());
+            m_gradient->setPosition(getContentSize() * (-0.5f));
             calculateHexagonStencil();
         }
 
     private:
         void calculateHexagonStencil() {
             m_stencil->clear();
-            auto vertices = generateHexagonVertices(m_hexagonSize, getContentSize() * 0.5f);
+            auto vertices = generateHexagonVertices(m_hexagonSize, cocos2d::Vec2::ZERO);
             m_stencil->drawPolygon(vertices.data(), 6, cocos2d::Color4F::WHITE, 0.0f, cocos2d::Color4F::WHITE);
         }
 

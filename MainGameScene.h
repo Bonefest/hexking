@@ -35,6 +35,8 @@ public:
     void postInit() {
         initContext();
         initSystems();
+//
+//        m_manager.getRegistry().on_destory<HexagonView>().connect<&MainGameScene::onDestoryHexagonView>(*this);
     }
 
     void initContext() {
@@ -51,6 +53,11 @@ public:
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
     }
+//
+//    void onDestoryHexagonView(entt::registry& registry, entt::entity hexagon) {
+//        auto hexagonViewComponent = registry.get<hk::HexagonView>(hexagon);
+//        hexagonViewComponent.node->removeFromParentAndCleanup(true);
+//    }
 
     void update(float delta) {
         m_manager.updateSystems(delta);

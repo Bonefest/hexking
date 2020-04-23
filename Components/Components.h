@@ -4,25 +4,29 @@
 #include "cocos2d.h"
 #include <vector>
 
+#include "HexagonNode.h"
+
 namespace hk {
 
     enum class HexagonStatus { ACTIVE, UNACTIVE };
 
     struct HexagonView {
         explicit HexagonView(cocos2d::Vec2 t_hexCoordinate,
-                             cocos2d::Color4F t_fillColor,
-                             cocos2d::Color4F t_borderColor,
-                             HexagonStatus t_status = HexagonStatus::ACTIVE): coordinate(t_hexCoordinate),
-                                                                              fillColor(t_fillColor),
-                                                                              borderColor(t_borderColor),
-                                                                              status(t_status) { }
+                             cocos2d::Color3B t_color,
+                             float t_hexSize) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            node = HexagonNode::createHexagon(t_hexSize);
+            node->setColor(t_color);
+            node->setPosition(hexToRectCoords(t_hexCoordinate, t_hexSize));
+            runningScene->addChild(node);
+        }
 
-        cocos2d::Vec2 coordinate;
+        ~HexagonView() {
+            cocos2d::log("here");
+            node->removeFromParentAndCleanup(true);
+        }
 
-        cocos2d::Color4F fillColor;
-        cocos2d::Color4F borderColor;
-
-        HexagonStatus status;
+        HexagonNode* node;
     };
 
     enum class HexagonType { ATTACKER, DEFENSER, WORKER };
