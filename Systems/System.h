@@ -36,11 +36,10 @@ namespace hk {
                 auto vertices = generateHexagonVertices(gameData.hexagonSize,
                                                         hexToRectCoords(view.coordinate, gameData.hexagonSize));
 
-                m_renderer->drawPolygon(vertices.data(),
+                m_renderer->drawPoly(vertices.data(),
                                         6,
-                                        view.fillColor,
-                                        gameData.lineWidth,
-                                        view.borderColor);
+                                        true,
+                                        cocos2d::Color4F::GRAY);
             });
         }
 
@@ -78,6 +77,7 @@ namespace hk {
                 switch(ed.first) {
                     case event_code::BEGAN: {
                         //TEST
+
                         auto a = rectToHexCoords(ed.second.getLocation(), 24.0f);
                         entt::entity hexagon = registry.create();
                         registry.assign<HexagonView>(hexagon,

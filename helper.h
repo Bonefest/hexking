@@ -23,6 +23,8 @@ namespace hk {
     float radians(float degrees);
 
     std::vector<cocos2d::Vec2> generateHexagonVertices(float size, cocos2d::Vec2 position);
+
+    cocos2d::Size calculateHexSize(float size);
 }
 
 #endif // HELPER_H_INCLUDED

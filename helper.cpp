@@ -72,4 +72,8 @@ namespace hk {
 
         return vertices;
     }
+
+    cocos2d::Size calculateHexSize(float size) {
+        return cocos2d::Size(2.0f * size, std::sqrt(3) * size);
+    }
 }

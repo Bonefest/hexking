@@ -9,6 +9,8 @@
 
 #include "Components/Components.h"
 
+#include "HexagonNode.h"
+
 class MainGameScene: public cocos2d::Scene {
 public:
     CREATE_FUNC(MainGameScene);
@@ -21,9 +23,10 @@ public:
             return false;
         }
 
-
+        hk::HexagonNode* hexagon = hk::HexagonNode::createHexagon(24.0f);
+        hexagon->setPosition(cocos2d::Vec2(200.0f, 200.0f));
+        addChild(hexagon);
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
-
 
         scheduleUpdate();
         return true;
