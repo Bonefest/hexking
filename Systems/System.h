@@ -21,18 +21,45 @@ namespace hk {
 
     class HexagonRenderingSystem: public ISystem {
     public:
-
-        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
-
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            m_renderer = cocos2d::DrawNode::create();
+            runningScene->addChild(m_renderer);
         }
 
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            m_renderer->clear();
+
+            GameData& gameData = registry.ctx<GameData>();
+
+            registry.view<HexagonView>().each([&](entt::entity hexagon, HexagonView& view){
+                auto vertices = generateHexagonVertices(gameData.hexagonSize,
+                                                        hexToRectCoords(view.coordinate, gameData.hexagonSize));
+
+                if(!registry.has<HexagonData>(hexagon)) {
+                    m_renderer->drawPoly(vertices.data(),
+                                            6,
+                                            true,
+                                            view.borderColor);
+                } else {
+                    m_renderer->drawPolygon(vertices.data(),
+                                            6,
+                                            view.fillColor,
+                                            1.0f,
+                                            view.borderColor);
+                }
+
+            });
+        }
+
+    private:
+        cocos2d::DrawNode* m_renderer;
 
         /*
             ? Loading hexagon vertices once and every frame controlling hexagon size. On resizing - recalculating model. ?
         */
 
     };
-
 
     typedef cocos2d::EventTouch::EventCode event_code;
     typedef std::pair<event_code, cocos2d::Touch> event_data;

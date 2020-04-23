@@ -12,17 +12,19 @@ namespace hk {
 
     struct HexagonView {
         explicit HexagonView(cocos2d::Vec2 t_hexCoordinate,
-                             cocos2d::Color3B t_color,
-                             float t_hexSize): node(nullptr) {
-            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
-            node = HexagonNode::createHexagon(t_hexSize);
-            node->setColor(t_color);
-            node->setPosition(hexToRectCoords(t_hexCoordinate, t_hexSize));
-            runningScene->addChild(node);
+                             cocos2d::Color4F t_fillColor,
+                             cocos2d::Color4F t_borderColor,
+                             HexagonStatus t_status = HexagonStatus::ACTIVE): coordinate(t_hexCoordinate),
+                                                                              fillColor(t_fillColor),
+                                                                              borderColor(t_borderColor),
+                                                                              status(t_status) { }
 
-        }
+        cocos2d::Vec2 coordinate;
 
-        HexagonNode* node;
+        cocos2d::Color4F fillColor;
+        cocos2d::Color4F borderColor;
+
+        HexagonStatus status;
     };
 
     enum class HexagonType { ATTACKER, DEFENSER, WORKER };
