@@ -13,17 +13,13 @@ namespace hk {
     struct HexagonView {
         explicit HexagonView(cocos2d::Vec2 t_hexCoordinate,
                              cocos2d::Color3B t_color,
-                             float t_hexSize) {
+                             float t_hexSize): node(nullptr) {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
             node = HexagonNode::createHexagon(t_hexSize);
             node->setColor(t_color);
             node->setPosition(hexToRectCoords(t_hexCoordinate, t_hexSize));
             runningScene->addChild(node);
-        }
 
-        ~HexagonView() {
-            cocos2d::log("here");
-            node->removeFromParentAndCleanup(true);
         }
 
         HexagonNode* node;

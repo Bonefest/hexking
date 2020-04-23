@@ -57,8 +57,15 @@ namespace hk {
             for(event_data ed : m_unprocessedEvents) {
                 switch(ed.first) {
                     case event_code::BEGAN: {
+                        std::vector<entt::entity> test;
+                        registry.view<HexagonView>().each([&](entt::entity entity, HexagonView& v){
+                            test.push_back(entity);
+                        });
 
-
+                        if(!test.empty() && registry.valid(test[0])) {
+                            cocos2d::log("%u", test.size());
+                            registry.destroy(test[0]);
+                        }
                         break;
                     }
 

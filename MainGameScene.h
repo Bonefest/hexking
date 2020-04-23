@@ -23,20 +23,18 @@ public:
             return false;
         }
 
-        hk::HexagonNode* hexagon = hk::HexagonNode::createHexagon(24.0f);
-        hexagon->setPosition(cocos2d::Vec2(200.0f, 200.0f));
-        addChild(hexagon);
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
 
         scheduleUpdate();
         return true;
     }
 
+
     void postInit() {
         initContext();
         initSystems();
-//
-//        m_manager.getRegistry().on_destory<HexagonView>().connect<&MainGameScene::onDestoryHexagonView>(*this);
+
+        m_manager.getRegistry().on_destroy<hk::HexagonView>().connect<&MainGameScene::onDestoryHexagonView>(*this);
     }
 
     void initContext() {
@@ -52,12 +50,15 @@ public:
     void initSystems() {
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
+
+        auto entity = m_manager.getRegistry().create();
+        m_manager.getRegistry().assign<hk::HexagonView>(entity, cocos2d::Vec2(3, 1), cocos2d::Color3B::YELLOW, 24.0f);
     }
-//
-//    void onDestoryHexagonView(entt::registry& registry, entt::entity hexagon) {
-//        auto hexagonViewComponent = registry.get<hk::HexagonView>(hexagon);
-//        hexagonViewComponent.node->removeFromParentAndCleanup(true);
-//    }
+
+    void onDestoryHexagonView(entt::registry& registry, entt::entity hexagon) {
+        auto hexagonViewComponent = registry.get<hk::HexagonView>(hexagon);
+        hexagonViewComponent.node->removeFromParentAndCleanup(true);
+    }
 
     void update(float delta) {
         m_manager.updateSystems(delta);
