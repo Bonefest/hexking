@@ -7,6 +7,7 @@
 
 
 #include "../Components/Components.h"
+#include "../Events/Events.h"
 #include "../helper.h"
 #include "../common.h"
 
@@ -22,10 +23,10 @@ namespace hk {
     class HexagonRenderingSystem: public ISystem {
     public:
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
-            auto worldContainer = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::Tags::ScrollWorldContainer);
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
             m_renderer = cocos2d::DrawNode::create();
             m_renderer->setPosition(cocos2d::Vec2(400, 0));
-            worldContainer->addChild(m_renderer);
+            runningScene->addChild(m_renderer);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
@@ -61,7 +62,7 @@ namespace hk {
     class InputHandlingSystem: public ISystem {
     public:
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
-            auto worldContainer = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::Tags::ScrollWorldContainer);
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
 
             auto cocosEDispatcher = cocos2d::Director::getInstance()->getEventDispatcher();
 
@@ -72,17 +73,37 @@ namespace hk {
             touchListener->onTouchEnded = CC_CALLBACK_2(InputHandlingSystem::onTouchEnded, this);
             touchListener->onTouchCancelled = CC_CALLBACK_2(InputHandlingSystem::onTouchCancelled, this);
 
-            cocosEDispatcher->addEventListenerWithSceneGraphPriority(touchListener, worldContainer);
+            cocosEDispatcher->addEventListenerWithSceneGraphPriority(touchListener, runningScene);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             for(event_data ed : m_unprocessedEvents) {
                 switch(ed.first) {
                     case event_code::BEGAN: {
-
+                        dispatcher.trigger<TouchBeganEvent>(ed.second);
+                        break;
                     }
 
+                    case event_code::MOVED: {
+                        dispatcher.trigger<TouchMovedEvent>(ed.second);
 
+                        auto camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+                        camera->setPosition(camera->getPosition() - ed.second.getDelta());
+
+                        break;
+                    }
+
+                    case event_code::ENDED: {
+                        dispatcher.trigger<TouchEndedEvent>(ed.second);
+
+                        break;
+                    }
+
+                    case event_code::CANCELLED: {
+                        dispatcher.trigger<TouchCancelledEvent>(ed.second);
+
+                        break;
+                    }
                 }
             }
 
@@ -95,19 +116,56 @@ namespace hk {
         }
 
         void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event) {
-
+            m_unprocessedEvents.push_back(event_data{event_code::MOVED, cocos2d::Touch(*touch)});
         }
 
         void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event) {
-
+            m_unprocessedEvents.push_back(event_data{event_code::ENDED, cocos2d::Touch(*touch)});
         }
 
         void onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event) {
-
+            m_unprocessedEvents.push_back(event_data{event_code::CANCELLED, cocos2d::Touch(*touch)});
         }
 
     private:
         std::vector<event_data> m_unprocessedEvents;
+    };
+
+    class HexagonTouchHandleSystem: public ISystem {
+    public:
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            dispatcher.sink<TouchBeganEvent>().connect<&HexagonTouchHandleSystem::onTouchBegan>(*this);
+            dispatcher.sink<TouchEndedEvent>().connect<&HexagonTouchHandleSystem::onTouchEnded>(*this);
+            dispatcher.sink<TouchMovedEvent>().connect<&HexagonTouchHandleSystem::onTouchMoved>(*this);
+            dispatcher.sink<TouchCancelledEvent>().connect<&HexagonTouchHandleSystem::onTouchCancelled>(*this);
+        }
+
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+
+        }
+
+        void onTouchBegan(const TouchBeganEvent& event) {
+            m_unprocessedTouchBeganEvents.push_back(event);
+        }
+
+        void onTouchEnded(const TouchEndedEvent& event) {
+            m_unprocessedTouchEndedEvents.push_back(event);
+        }
+
+        void onTouchMoved(const TouchMovedEvent& event) {
+            m_unprocessedTouchMovedEvents.push_back(event);
+        }
+
+        void onTouchCancelled(const TouchCancelledEvent& event) {
+            m_unprocessedTouchCancelledEvents.push_back(event);
+        }
+    private:
+        std::vector<TouchBeganEvent> m_unprocessedTouchBeganEvents;
+        std::vector<TouchEndedEvent> m_unprocessedTouchEndedEvents;
+        std::vector<TouchMovedEvent> m_unprocessedTouchMovedEvents;
+        std::vector<TouchCancelledEvent> m_unprocessedTouchCancelledEvents;
+
+
     };
 
 }

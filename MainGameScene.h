@@ -15,6 +15,8 @@
 
 #include "common.h"
 
+#include "ui/UIButton.h"
+
 class MainGameScene: public cocos2d::Scene {
 public:
     CREATE_FUNC(MainGameScene);
@@ -31,7 +33,7 @@ public:
         auto hexagonSize = hk::calculateHexSize(24.0f);
 
         cocos2d::ui::ScrollView* scrollWorldContainer = cocos2d::ui::ScrollView::create();
-
+        scrollWorldContainer->setEnabled(false);
         scrollWorldContainer->setContentSize(visibleSize);
         scrollWorldContainer->setInnerContainerSize(visibleSize * 1.5f);
         scrollWorldContainer->setDirection(cocos2d::ui::ScrollView::Direction::BOTH);
@@ -42,6 +44,13 @@ public:
         addChild(scrollWorldContainer);
 
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
+
+        //TEST
+        cocos2d::ui::Button* buyWorkerButton = cocos2d::ui::Button::create("HelloWorld.png");
+        buyWorkerButton->setTitleText("Buy worker");
+        buyWorkerButton->setPosition(cocos2d::Vec2(400, 400));
+
+        addChild(buyWorkerButton, 2);
 
         scheduleUpdate();
         return true;
