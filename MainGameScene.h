@@ -51,6 +51,7 @@ public:
     void postInit() {
         initContext();
         initSystems();
+        generatePlayers(2);
         generateGrid();
 
 
@@ -72,10 +73,21 @@ public:
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
     }
 
-    void generatePlayers() {
+    void generatePlayers(int players) {
         auto& registry = m_manager.getRegistry();
-        entt::entity playerOne = registry.create();
+        hk::GameData& gameData = registry.ctx<hk::GameData>();
 
+        gameData.playersSize = players;
+
+        for(int i = 0;i < players; i++) {
+            hk::Team team = hk::Team(i);
+
+            entt::entity player = registry.create();
+            registry.assign<hk::Player>(player, team);
+            gameData.players[team] = player;
+        }
+
+        gameData.controllableTeam = hk::Team::TEAM_1;
     }
 
     void generateGrid() {
@@ -89,6 +101,26 @@ public:
                 registry.assign<hk::Hexagon>(hexagon, cocos2d::Vec2(x, y));
                 gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
             }
+        }
+
+        //Generating players starting hexagons
+        auto isAvailablePosition = [&](cocos2d::Vec2 position)->bool {
+            auto entity = gameMap.getHexagon(position);
+            return (registry.valid(entity) && !registry.has<hk::HexagonRole>(entity));
+        };
+
+        hk::GameData gameData = registry.ctx<hk::GameData>();
+        for(int i = 0;i < gameData.playersSize; i++) {
+            cocos2d::Vec2 startPosition = cocos2d::Vec2(-32,-32);
+            while(!isAvailablePosition(startPosition)) {
+                startPosition = cocos2d::Vec2(cocos2d::RandomHelper::random_int(0, 32), cocos2d::RandomHelper::random_int(0, 32));
+            }
+
+            cocos2d::log("here");
+
+            auto hexagon = gameMap.getHexagon(startPosition);
+            registry.assign<hk::HexagonRole>(hexagon, hk::Role::WORKER, 1);
+            registry.get<hk::Hexagon>(hexagon).team = hk::Team(i);
         }
     }
 

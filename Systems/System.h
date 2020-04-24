@@ -24,6 +24,7 @@ namespace hk {
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             auto worldContainer = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::Tags::ScrollWorldContainer);
             m_renderer = cocos2d::DrawNode::create();
+            m_renderer->setPosition(cocos2d::Vec2(400, 0));
             worldContainer->addChild(m_renderer);
         }
 
@@ -31,7 +32,6 @@ namespace hk {
             m_renderer->clear();
 
             GameData& gameData = registry.ctx<GameData>();
-            gameDadata
 
             registry.view<Hexagon>().each([&](entt::entity entity, Hexagon& hexagon){
                 auto vertices = generateHexagonVertices(gameData.hexagonSize,
@@ -43,14 +43,14 @@ namespace hk {
                                             true,
                                             cocos2d::Color4F::WHITE);
                 } else {
-                    auto fillColor = hexagon.displayColor;
+                    auto fillColor = getTeamColor(hexagon.team);
                     auto borderColor = fillColor;
-                    borderColor.a = 0.5f;
+                    borderColor *= 0.5f;
 
                     m_renderer->drawPolygon(vertices.data(),
                                             6,
                                             fillColor,
-                                            1.0f,
+                                            2.0f,
                                             borderColor);
                 }
 
