@@ -28,7 +28,8 @@ namespace hk {
                                                         hp(0.0f),
                                                         currentHp(0.0f),
                                                         damage(0.0f),
-                                                        income(0.0f) {
+                                                        income(0.0f),
+                                                        incomePeriod(0.0f) {
             //Call stats calculator function or class method
 
             level = std::min(std::max(1, t_level), 6);
@@ -52,6 +53,7 @@ namespace hk {
                     currentHp = hp = t_level * 3.0f;
                     damage = t_level * 0.1f;
                     income = t_level * 10.0f;
+                    incomePeriod = 1.1f - t_level * 0.1f;
                     break;
                 }
             }
@@ -64,6 +66,7 @@ namespace hk {
 
         float damage;
         float income;
+        float incomePeriod;
 
         int level;
     };

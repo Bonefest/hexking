@@ -7,6 +7,8 @@ namespace hk {
         enum Tags {
             ScrollWorldContainer = 1
         };
+
+        const static float BORDER_SIZE = 2.0f;
     }
 
 }

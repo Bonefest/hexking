@@ -31,29 +31,8 @@ namespace hk {
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             m_renderer->clear();
 
-            GameData& gameData = registry.ctx<GameData>();
-
             registry.view<Hexagon>().each([&](entt::entity entity, Hexagon& hexagon){
-                auto vertices = generateHexagonVertices(gameData.hexagonSize,
-                                                        hexToRectCoords(hexagon.position, gameData.hexagonSize));
-
-                if(hexagon.team == Team::NO_TEAM) {
-                    m_renderer->drawPoly(vertices.data(),
-                                            6,
-                                            true,
-                                            cocos2d::Color4F::WHITE);
-                } else {
-                    auto fillColor = getTeamColor(hexagon.team);
-                    auto borderColor = fillColor;
-                    borderColor *= 0.5f;
-
-                    m_renderer->drawPolygon(vertices.data(),
-                                            6,
-                                            fillColor,
-                                            2.0f,
-                                            borderColor);
-                }
-
+                hexagon.stateOwner.draw(m_renderer, registry, entity);
             });
         }
 
@@ -64,6 +43,15 @@ namespace hk {
             ? Loading hexagon vertices once and every frame controlling hexagon size. On resizing - recalculating model. ?
         */
 
+    };
+
+    class HexagonUpdatingSystem: public ISystem {
+    public:
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            registry.view<Hexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent){
+                hexagonComponent.stateOwner.update(registry, dispatcher, hexagon, delta);
+            });
+        }
     };
 
     typedef cocos2d::EventTouch::EventCode event_code;

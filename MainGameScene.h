@@ -70,7 +70,8 @@ public:
 
     void initSystems() {
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
-        m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
+        m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 2);
+        m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 3);
     }
 
     void generatePlayers(int players) {
@@ -98,7 +99,10 @@ public:
                 if(rand() % 2) continue;
 
                 entt::entity hexagon = registry.create();
-                registry.assign<hk::Hexagon>(hexagon, cocos2d::Vec2(x, y));
+                hk::Hexagon hexagonComponent(cocos2d::Vec2(x, y));
+                hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<hk::HexagonIdle>());
+
+                registry.assign<hk::Hexagon>(hexagon, hexagonComponent);
                 gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
             }
         }

@@ -19,7 +19,7 @@ namespace hk {
         m_currentState->draw(drawNode, registry, hexagon);
     }
 
-	void StateOwner::update(entt::registry& registry, entt::entity hexagon, float delta) {
-        m_currentState->update(registry, hexagon, delta);
+	void StateOwner::update(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity hexagon, float delta) {
+        m_currentState->update(registry, dispatcher, hexagon, delta);
 	}
 }

@@ -15,7 +15,7 @@ namespace hk {
         void setState(entt::registry& registry, entt::entity hexagon, std::shared_ptr<IHexagonState> state);
 
         void draw(cocos2d::DrawNode* drawNode, entt::registry& registry, entt::entity hexagon);
-        void update(entt::registry& registry, entt::entity hexagon, float delta);
+        void update(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity hexagon, float delta);
 
     private:
         std::shared_ptr<IHexagonState> m_currentState;
