@@ -8,7 +8,7 @@
 
 #include "../Components/Components.h"
 #include "../helper.h"
-
+#include "../common.h"
 
 namespace hk {
 
@@ -22,15 +22,16 @@ namespace hk {
     class HexagonRenderingSystem: public ISystem {
     public:
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
-            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            auto worldContainer = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::Tags::ScrollWorldContainer);
             m_renderer = cocos2d::DrawNode::create();
-            runningScene->addChild(m_renderer);
+            worldContainer->addChild(m_renderer);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             m_renderer->clear();
 
             GameData& gameData = registry.ctx<GameData>();
+            gameDadata
 
             registry.view<Hexagon>().each([&](entt::entity entity, Hexagon& hexagon){
                 auto vertices = generateHexagonVertices(gameData.hexagonSize,
@@ -42,7 +43,7 @@ namespace hk {
                                             true,
                                             cocos2d::Color4F::WHITE);
                 } else {
-                    auto fillColor = getTeamColor(hexagon.team);
+                    auto fillColor = hexagon.displayColor;
                     auto borderColor = fillColor;
                     borderColor.a = 0.5f;
 
@@ -72,6 +73,8 @@ namespace hk {
     class InputHandlingSystem: public ISystem {
     public:
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            auto worldContainer = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::Tags::ScrollWorldContainer);
+
             auto cocosEDispatcher = cocos2d::Director::getInstance()->getEventDispatcher();
 
             auto touchListener = cocos2d::EventListenerTouchOneByOne::create();
@@ -81,7 +84,7 @@ namespace hk {
             touchListener->onTouchEnded = CC_CALLBACK_2(InputHandlingSystem::onTouchEnded, this);
             touchListener->onTouchCancelled = CC_CALLBACK_2(InputHandlingSystem::onTouchCancelled, this);
 
-            cocosEDispatcher->addEventListenerWithFixedPriority(touchListener, 1);
+            cocosEDispatcher->addEventListenerWithSceneGraphPriority(touchListener, worldContainer);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {

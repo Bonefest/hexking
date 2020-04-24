@@ -1,6 +1,7 @@
 #ifndef MAINGAMESCENE_H_INCLUDED
 #define MAINGAMESCENE_H_INCLUDED
 
+#include "ui/UIScrollView.h"
 #include "cocos2d.h"
 #include <vector>
 
@@ -11,6 +12,8 @@
 
 #include "HexagonNode.h"
 #include "GameMap.h"
+
+#include "common.h"
 
 class MainGameScene: public cocos2d::Scene {
 public:
@@ -23,6 +26,20 @@ public:
         if(!cocos2d::Scene::init()) {
             return false;
         }
+
+        auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
+        auto hexagonSize = hk::calculateHexSize(24.0f);
+
+        cocos2d::ui::ScrollView* scrollWorldContainer = cocos2d::ui::ScrollView::create();
+
+        scrollWorldContainer->setContentSize(visibleSize);
+        scrollWorldContainer->setInnerContainerSize(visibleSize * 1.5f);
+        scrollWorldContainer->setDirection(cocos2d::ui::ScrollView::Direction::BOTH);
+        scrollWorldContainer->setScrollBarEnabled(false);
+
+        scrollWorldContainer->setTag(hk::Constants::Tags::ScrollWorldContainer);
+
+        addChild(scrollWorldContainer);
 
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
 
@@ -53,6 +70,12 @@ public:
     void initSystems() {
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 2);
+    }
+
+    void generatePlayers() {
+        auto& registry = m_manager.getRegistry();
+        entt::entity playerOne = registry.create();
+
     }
 
     void generateGrid() {
