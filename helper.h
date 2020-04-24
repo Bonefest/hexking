@@ -28,6 +28,8 @@ namespace hk {
     cocos2d::Size calculateHexSize(float size);
 
     cocos2d::Color4F getTeamColor(Team team);
+
+    double getCurrentTimeInMs();
 }
 
 #endif // HELPER_H_INCLUDED

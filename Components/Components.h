@@ -53,7 +53,7 @@ namespace hk {
                     currentHp = hp = t_level * 3.0f;
                     damage = t_level * 0.1f;
                     income = t_level * 10.0f;
-                    incomePeriod = 1.1f - t_level * 0.1f;
+                    incomePeriod = 2.1f - t_level * 0.1f;
                     break;
                 }
             }
@@ -80,8 +80,9 @@ namespace hk {
         std::vector<cocos2d::Vec2> capturedCells;
     };
 
-    struct Controllable {
-
+    struct FocusedHexagon {
+        int a;
+        //pressingTime;
     };
 
     struct GameData {

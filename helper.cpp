@@ -1,6 +1,8 @@
 #include "cocos2d.h"
 #include "helper.h"
 
+#include <chrono>
+
 namespace hk {
 
     cocos2d::Vec3 hexToCube(cocos2d::Vec2 hex) {
@@ -86,5 +88,10 @@ namespace hk {
         }
 
         return cocos2d::Color4F::WHITE;
+    }
+
+    double getCurrentTimeInMs() {
+        auto time_point = std::chrono::system_clock::now();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch()).count();
     }
 }

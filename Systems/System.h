@@ -8,6 +8,7 @@
 
 #include "../Components/Components.h"
 #include "../Events/Events.h"
+#include "../GameMap.h"
 #include "../helper.h"
 #include "../common.h"
 
@@ -22,23 +23,32 @@ namespace hk {
 
     class HexagonRenderingSystem: public ISystem {
     public:
+        HexagonRenderingSystem(): m_elapsedTime(0.0f) { }
+
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
             m_renderer = cocos2d::DrawNode::create();
-            m_renderer->setPosition(cocos2d::Vec2(400, 0));
             runningScene->addChild(m_renderer);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            m_elapsedTime += 5.0f * delta;
             m_renderer->clear();
 
             registry.view<Hexagon>().each([&](entt::entity entity, Hexagon& hexagon){
                 hexagon.stateOwner.draw(m_renderer, registry, entity);
             });
+
+            GameData& gameData = registry.ctx<GameData>();
+            registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, FocusedHexagon& focusedHexagonComponent){
+                auto vertices = generateHexagonVertices(gameData.hexagonSize + 1.0f, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
+                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
+            });
         }
 
     private:
         cocos2d::DrawNode* m_renderer;
+        float m_elapsedTime;
 
         /*
             ? Loading hexagon vertices once and every frame controlling hexagon size. On resizing - recalculating model. ?
@@ -141,7 +151,33 @@ namespace hk {
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            GameData& gameData = registry.ctx<GameData>();
+            GameMap& gameMap = registry.ctx<GameMap>();
+            for(auto event: m_unprocessedTouchBeganEvents) {
+//                registry.clear<FocusedHexagon>();
+//
+//                cocos2d::Camera* camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+//                cocos2d::Vec2 globalLocation = camera->getPosition();
+//                globalLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
+//                globalLocation += event.touch.getLocation();
+//
+//
+//                m_focusedHexagon = gameMap.getHexagonAtPixel(globalLocation, gameData.hexagonSize);
+//                if(registry.valid(m_focusedHexagon)) {
+//                    registry.assign<FocusedHexagon>(m_focusedHexagon);
+//                    cocos2d::log("here");
+//                }
+            }
 
+            for(auto event: m_unprocessedTouchMovedEvents) {
+
+
+            }
+
+            m_unprocessedTouchBeganEvents.clear();
+            m_unprocessedTouchEndedEvents.clear();
+            m_unprocessedTouchMovedEvents.clear();
+            m_unprocessedTouchCancelledEvents.clear();
         }
 
         void onTouchBegan(const TouchBeganEvent& event) {
@@ -165,7 +201,8 @@ namespace hk {
         std::vector<TouchMovedEvent> m_unprocessedTouchMovedEvents;
         std::vector<TouchCancelledEvent> m_unprocessedTouchCancelledEvents;
 
-
+        entt::entity m_focusedHexagon;
+        std::map<entt::entity, double> m_pressedHexagons;
     };
 
 }
