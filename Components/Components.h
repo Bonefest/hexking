@@ -6,6 +6,7 @@
 #include <map>
 
 #include "../Dependencies/entt.hpp"
+#include "../States/StateOwner.h"
 
 namespace hk {
 
@@ -19,6 +20,7 @@ namespace hk {
         cocos2d::Vec2 position;
 
         Team team;
+        StateOwner stateOwner;
     };
 
     struct HexagonRole {
