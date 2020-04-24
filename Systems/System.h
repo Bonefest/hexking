@@ -278,8 +278,9 @@ namespace hk {
 
                     if(registry.valid(pressedHexagonIter->first) && registry.has<PressedHexagon>(pressedHexagonIter->first)) {
                         cocos2d::log("trigger upgrade hexagon event!");
+                        registry.remove<PressedHexagon>(pressedHexagonIter->first);
+
                         pressedHexagonIter = m_pressedHexagons.erase(pressedHexagonIter);
-                        registry.remove_if_exists<PressedHexagon>(pressedHexagonIter->first);
                     }
                 } else {
                     pressedHexagonIter++;
