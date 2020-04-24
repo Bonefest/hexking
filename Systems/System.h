@@ -40,18 +40,19 @@ namespace hk {
             });
 
             GameData& gameData = registry.ctx<GameData>();
-            registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, FocusedHexagon& focusedHexagonComponent){
-                auto vertices = generateHexagonVertices(gameData.hexagonSize + 1.0f, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
-            });
-
             registry.view<Hexagon, PressedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, PressedHexagon& pressedHexagonComponent){
 
                 double t = std::min((getCurrentTimeInMs() - pressedHexagonComponent.pressingTime) / 1000.0, 1.0);
 
                 auto vertices = generateHexagonVertices(t * gameData.hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, t), 0.0f, cocos2d::Color4F::BLACK);
+                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.75f, 0.75f, 0.75f, (t + 1.0f) * 0.5f), 0.0f, cocos2d::Color4F::BLACK);
             });
+
+            registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, FocusedHexagon& focusedHexagonComponent){
+                auto vertices = generateHexagonVertices(gameData.hexagonSize + 1.0f, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
+                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
+            });
+
         }
 
     private:
@@ -268,6 +269,9 @@ namespace hk {
             for(auto event: m_unprocessedCanceledEvents) {
                 auto hexagonIter = m_pressedHexagons.find(event.hexagon);
                 if(hexagonIter != m_pressedHexagons.end()) {
+                    registry.remove_if_exists<PressedHexagon>(event.hexagon);
+                    registry.remove_if_exists<FocusedHexagon>(event.hexagon);
+
                     m_pressedHexagons.erase(hexagonIter);
                 }
             }
