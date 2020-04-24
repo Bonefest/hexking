@@ -44,6 +44,14 @@ namespace hk {
                 auto vertices = generateHexagonVertices(gameData.hexagonSize + 1.0f, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
                 m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
             });
+
+            registry.view<Hexagon, PressedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, PressedHexagon& pressedHexagonComponent){
+
+                double t = std::min((getCurrentTimeInMs() - pressedHexagonComponent.pressingTime) / 1000.0, 1.0);
+
+                auto vertices = generateHexagonVertices(t * gameData.hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
+                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(1.0f, 1.0f, 1.0f, t), 0.0f, cocos2d::Color4F::BLACK);
+            });
         }
 
     private:
@@ -157,31 +165,6 @@ namespace hk {
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             GameData& gameData = registry.ctx<GameData>();
             GameMap& gameMap = registry.ctx<GameMap>();
-//            for(auto event: m_unprocessedTouchBeganEvents) {
-//
-//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
-//                if(registry.valid(m_pressedHexagon)) {
-//                    m_pressedHexagon.first = hexagon;
-//                    m_pressedHexagon.second = getCurrentTimeInMs();
-//                    registry.assign<PressedHexagon>(hexagon, getCurrentTimeInMs());
-//                    //registry.assign<FocusedHexagon>(m_focusedHexagon);
-//                }
-//            }
-//
-//            for(auto event: m_unprocessedTouchMovedEvents) {
-//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
-//                if(registry.valid(m_pressedHexagon.first) && hexagon != m_pressedHexagon.first) {
-//                    //Canceling pressing
-//                    m_pressedHexagon.first = entt::null;
-//                }
-//            }
-//
-//            for(auto event: m_unprocessedTouchEndedEvents) {
-//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.tocuh), gameData.hexagonSize);
-//                if(registry.valid(hexagon) && hexagon == m_pressedHexagon.first) {
-//                    if(getCurrentTimeInMs() - )
-//                }
-//            }
 
             for(auto event: m_unprocessedTouchBeganEvents) {
                 auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
@@ -264,8 +247,48 @@ namespace hk {
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             for(auto event: m_unprocessedPressedEvents) {
+                m_pressedHexagons[event.hexagon] = getCurrentTimeInMs();
+                registry.assign_or_replace<PressedHexagon>(event.hexagon, getCurrentTimeInMs());
+            }
+
+            for(auto event: m_unprocessedReleasedEvents) {
+                registry.clear<FocusedHexagon>();
+
+                auto hexagonIter = m_pressedHexagons.find(event.hexagon);
+                if(hexagonIter != m_pressedHexagons.end()) {
+                    m_pressedHexagons.erase(hexagonIter);
+                    registry.assign<FocusedHexagon>(event.hexagon);
+                    registry.remove_if_exists<PressedHexagon>(event.hexagon);
+
+                    cocos2d::log("trigger hexagon menu event!");
+                }
 
             }
+
+            for(auto event: m_unprocessedCanceledEvents) {
+                auto hexagonIter = m_pressedHexagons.find(event.hexagon);
+                if(hexagonIter != m_pressedHexagons.end()) {
+                    m_pressedHexagons.erase(hexagonIter);
+                }
+            }
+
+            for(auto pressedHexagonIter = m_pressedHexagons.begin(); pressedHexagonIter != m_pressedHexagons.end();) {
+
+                if(getCurrentTimeInMs() - pressedHexagonIter->second > 1000.0) {
+
+                    if(registry.valid(pressedHexagonIter->first) && registry.has<PressedHexagon>(pressedHexagonIter->first)) {
+                        cocos2d::log("trigger upgrade hexagon event!");
+                        pressedHexagonIter = m_pressedHexagons.erase(pressedHexagonIter);
+                        registry.remove_if_exists<PressedHexagon>(pressedHexagonIter->first);
+                    }
+                } else {
+                    pressedHexagonIter++;
+                }
+            }
+
+            m_unprocessedPressedEvents.clear();
+            m_unprocessedReleasedEvents.clear();
+            m_unprocessedCanceledEvents.clear();
         }
 
         void onHexagonPressedEvent(const HexagonPressedEvent& event) {
@@ -285,6 +308,7 @@ namespace hk {
         std::vector<HexagonReleasedEvent> m_unprocessedReleasedEvents;
         std::vector<HexagonCancelledEvent> m_unprocessedCanceledEvents;
 
+        std::map<entt::entity, double> m_pressedHexagons;
     };
 }
 
