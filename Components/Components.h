@@ -80,6 +80,11 @@ namespace hk {
         std::vector<cocos2d::Vec2> capturedCells;
     };
 
+    struct PressedHexagon {
+        explicit PressedHexagon(double t_pressingTime): pressingTime(t_pressingTime) { }
+        double pressingTime;
+    };
+
     struct FocusedHexagon {
         int a;
         //pressingTime;

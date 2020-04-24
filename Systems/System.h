@@ -143,6 +143,10 @@ namespace hk {
 
     class HexagonTouchHandleSystem: public ISystem {
     public:
+        HexagonTouchHandleSystem() {
+            m_pressedHexagon = std::pair{entt::null, 0.0};
+        }
+
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             dispatcher.sink<TouchBeganEvent>().connect<&HexagonTouchHandleSystem::onTouchBegan>(*this);
             dispatcher.sink<TouchEndedEvent>().connect<&HexagonTouchHandleSystem::onTouchEnded>(*this);
@@ -153,25 +157,61 @@ namespace hk {
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             GameData& gameData = registry.ctx<GameData>();
             GameMap& gameMap = registry.ctx<GameMap>();
-            for(auto event: m_unprocessedTouchBeganEvents) {
-//                registry.clear<FocusedHexagon>();
+//            for(auto event: m_unprocessedTouchBeganEvents) {
 //
-//                cocos2d::Camera* camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
-//                cocos2d::Vec2 globalLocation = camera->getPosition();
-//                globalLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
-//                globalLocation += event.touch.getLocation();
-//
-//
-//                m_focusedHexagon = gameMap.getHexagonAtPixel(globalLocation, gameData.hexagonSize);
-//                if(registry.valid(m_focusedHexagon)) {
-//                    registry.assign<FocusedHexagon>(m_focusedHexagon);
-//                    cocos2d::log("here");
+//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
+//                if(registry.valid(m_pressedHexagon)) {
+//                    m_pressedHexagon.first = hexagon;
+//                    m_pressedHexagon.second = getCurrentTimeInMs();
+//                    registry.assign<PressedHexagon>(hexagon, getCurrentTimeInMs());
+//                    //registry.assign<FocusedHexagon>(m_focusedHexagon);
 //                }
+//            }
+//
+//            for(auto event: m_unprocessedTouchMovedEvents) {
+//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
+//                if(registry.valid(m_pressedHexagon.first) && hexagon != m_pressedHexagon.first) {
+//                    //Canceling pressing
+//                    m_pressedHexagon.first = entt::null;
+//                }
+//            }
+//
+//            for(auto event: m_unprocessedTouchEndedEvents) {
+//                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.tocuh), gameData.hexagonSize);
+//                if(registry.valid(hexagon) && hexagon == m_pressedHexagon.first) {
+//                    if(getCurrentTimeInMs() - )
+//                }
+//            }
+
+            for(auto event: m_unprocessedTouchBeganEvents) {
+                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
+                if(registry.valid(hexagon)) {
+                    m_pressedHexagons[event.touch.getID()] = hexagon;
+                    dispatcher.trigger<HexagonPressedEvent>(event.touch, hexagon);
+                }
             }
 
             for(auto event: m_unprocessedTouchMovedEvents) {
+                auto hexagonIter = m_pressedHexagons.find(event.touch.getID());
+                if(hexagonIter == m_pressedHexagons.end()) break;
 
+                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
+                if(hexagonIter->second != hexagon) {
+                    m_pressedHexagons.erase(event.touch.getID());
+                    dispatcher.trigger<HexagonCancelledEvent>(event.touch, hexagon);
+                }
+            }
 
+            for(auto event: m_unprocessedTouchEndedEvents) {
+                auto hexagonIter = m_pressedHexagons.find(event.touch.getID());
+                if(hexagonIter == m_pressedHexagons.end()) break;
+
+                auto hexagon = gameMap.getHexagonAtPixel(getTouchWorldLocation(event.touch), gameData.hexagonSize);
+                if(hexagonIter->second == hexagon) {
+                    dispatcher.trigger<HexagonReleasedEvent>(event.touch, hexagon);
+                }
+
+                m_pressedHexagons.erase(event.touch.getID());
             }
 
             m_unprocessedTouchBeganEvents.clear();
@@ -196,15 +236,56 @@ namespace hk {
             m_unprocessedTouchCancelledEvents.push_back(event);
         }
     private:
+        cocos2d::Vec2 getTouchWorldLocation(cocos2d::Touch touch) {
+            cocos2d::Camera* camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+            cocos2d::Vec2 worldLocation = camera->getPosition();
+            worldLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
+            worldLocation += touch.getLocation();
+
+            return worldLocation;
+        }
+
         std::vector<TouchBeganEvent> m_unprocessedTouchBeganEvents;
         std::vector<TouchEndedEvent> m_unprocessedTouchEndedEvents;
         std::vector<TouchMovedEvent> m_unprocessedTouchMovedEvents;
         std::vector<TouchCancelledEvent> m_unprocessedTouchCancelledEvents;
 
-        entt::entity m_focusedHexagon;
-        std::map<entt::entity, double> m_pressedHexagons;
+        std::pair<entt::entity, double> m_pressedHexagon;
+        std::map<int, entt::entity> m_pressedHexagons;
     };
 
+    class HexagonTouchActionSystem: public ISystem {
+    public:
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            dispatcher.sink<HexagonPressedEvent>().connect<&HexagonTouchActionSystem::onHexagonPressedEvent>(*this);
+            dispatcher.sink<HexagonReleasedEvent>().connect<&HexagonTouchActionSystem::onHexagonReleasedEvent>(*this);
+            dispatcher.sink<HexagonCancelledEvent>().connect<&HexagonTouchActionSystem::onHexagonCancelledEvent>(*this);
+        }
+
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            for(auto event: m_unprocessedPressedEvents) {
+
+            }
+        }
+
+        void onHexagonPressedEvent(const HexagonPressedEvent& event) {
+            m_unprocessedPressedEvents.push_back(event);
+        }
+
+        void onHexagonReleasedEvent(const HexagonReleasedEvent& event) {
+            m_unprocessedReleasedEvents.push_back(event);
+        }
+
+        void onHexagonCancelledEvent(const HexagonCancelledEvent& event) {
+            m_unprocessedCanceledEvents.push_back(event);
+        }
+
+    private:
+        std::vector<HexagonPressedEvent> m_unprocessedPressedEvents;
+        std::vector<HexagonReleasedEvent> m_unprocessedReleasedEvents;
+        std::vector<HexagonCancelledEvent> m_unprocessedCanceledEvents;
+
+    };
 }
 
 

@@ -80,6 +80,7 @@ public:
     void initSystems() {
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonTouchHandleSystem>(), 1);
+        m_manager.addSystem(std::make_shared<hk::HexagonTouchActionSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 2);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 3);
     }

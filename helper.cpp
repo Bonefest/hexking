@@ -92,6 +92,6 @@ namespace hk {
 
     double getCurrentTimeInMs() {
         auto time_point = std::chrono::system_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch()).count();
+        return std::chrono::duration_cast<std::chrono::nanoseconds>(time_point.time_since_epoch()).count() / 1000.0f;
     }
 }

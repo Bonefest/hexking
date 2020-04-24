@@ -1,6 +1,7 @@
 #ifndef EVENTS_H_INCLUDED
 #define EVENTS_H_INCLUDED
 
+#include "Dependencies/entt.hpp"
 #include "cocos2d.h"
 
 namespace hk {
@@ -28,5 +29,29 @@ namespace hk {
         cocos2d::Touch touch;
     };
 
+
+    struct HexagonPressedEvent {
+        HexagonPressedEvent(cocos2d::Touch t_touch, entt::entity t_hexagon): touch(t_touch),
+                                                                             hexagon(t_hexagon) { }
+
+        cocos2d::Touch touch;
+        entt::entity hexagon;
+    };
+
+    struct HexagonReleasedEvent {
+        HexagonReleasedEvent(cocos2d::Touch t_touch, entt::entity t_hexagon): touch(t_touch),
+                                                                              hexagon(t_hexagon) { }
+
+        cocos2d::Touch touch;
+        entt::entity hexagon;
+    };
+
+    struct HexagonCancelledEvent {
+        HexagonCancelledEvent(cocos2d::Touch t_touch, entt::entity t_hexagon): touch(t_touch),
+                                                                               hexagon(t_hexagon) { }
+
+        cocos2d::Touch touch;
+        entt::entity hexagon;
+    };
 }
 #endif // EVENTS_H_INCLUDED
