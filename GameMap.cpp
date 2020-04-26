@@ -50,7 +50,9 @@ namespace hk {
             if(!registry.valid(hexagon)) continue;
 
             if(auto hexagonComponent = registry.try_get<Hexagon>(hexagon); hexagonComponent) {
-                if(hexagonComponent->team == friendTeam) return true;
+                if(hexagonComponent->team == friendTeam) {
+                    return true;
+                }
             }
         }
 

@@ -94,4 +94,14 @@ namespace hk {
         auto time_point = std::chrono::system_clock::now();
         return std::chrono::duration_cast<std::chrono::nanoseconds>(time_point.time_since_epoch()).count() / 1e6;
     }
+
+    bool isFriendlyHexagon(entt::registry& registry, entt::entity hexagon) {
+        auto gameData = registry.ctx<GameData>();
+        if(auto hexagonComponent = registry.try_get<Hexagon>(hexagon); hexagonComponent) {
+            return hexagonComponent->team == gameData.controllableTeam;
+        }
+
+        return false;
+    }
+
 }

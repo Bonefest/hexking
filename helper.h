@@ -30,6 +30,8 @@ namespace hk {
     cocos2d::Color4F getTeamColor(Team team);
 
     double getCurrentTimeInMs();
+
+    bool isFriendlyHexagon(entt::registry& registry, entt::entity hexagon);
 }
 
 #endif // HELPER_H_INCLUDED

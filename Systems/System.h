@@ -249,21 +249,17 @@ namespace hk {
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             for(auto event: m_unprocessedPressedEvents) {
                 m_pressedHexagons[event.hexagon] = getCurrentTimeInMs();
-                registry.assign_or_replace<PressedHexagon>(event.hexagon, getCurrentTimeInMs());
+                if(isFriendlyHexagon(registry, event.hexagon))
+                    registry.assign_or_replace<PressedHexagon>(event.hexagon, getCurrentTimeInMs());
             }
 
             for(auto event: m_unprocessedReleasedEvents) {
-                registry.clear<FocusedHexagon>();
-
                 auto hexagonIter = m_pressedHexagons.find(event.hexagon);
                 if(hexagonIter != m_pressedHexagons.end()) {
                     m_pressedHexagons.erase(hexagonIter);
-                    registry.assign<FocusedHexagon>(event.hexagon);
                     registry.remove_if_exists<PressedHexagon>(event.hexagon);
 
-                    cocos2d::log("trigger hexagon menu event!");
-
-                    //dispatcher.trigger<ShowHexagonMenuEvent>(event.hexagon);
+                    dispatcher.trigger<ShowHexagonMenuEvent>(event.hexagon);
                 }
 
             }
@@ -325,6 +321,8 @@ namespace hk {
 
             m_menuRenderer = cocos2d::DrawNode::create();
             runningScene->addChild(m_menuRenderer);
+
+            dispatcher.sink<ShowHexagonMenuEvent>().connect<&HexagonMenuSystem::onShowHexagonMenuEvent>(*this);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
@@ -333,13 +331,27 @@ namespace hk {
             GameData& gameData = registry.ctx<GameData>();
             GameMap& gameMap = registry.ctx<GameMap>();
 
+            if(!m_unprocessedEvents.empty()) {
+                registry.clear<FocusedHexagon>();
+
+                auto hexagon = m_unprocessedEvents.back().hexagon;
+                Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
+                if(hexagonComponent.team == gameData.controllableTeam ||
+                   gameMap.hasFriendNeighbour(registry, hexagonComponent.position, gameData.controllableTeam)) {
+                    //generate buttons
+                    registry.assign_or_replace<FocusedHexagon>(hexagon);
+                }
+
+                m_unprocessedEvents.clear();
+            }
+
             registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon,
                                                               Hexagon& hexagonComponent,
                                                               FocusedHexagon& focusedComponent) {
-                cocos2d::log("%f %f", hexagonComponent.position.x, hexagonComponent.position.y);
+
                 if(hexagonComponent.team == gameData.controllableTeam) {
                     cocos2d::log("show: upgrade button '+', and info inside other buttons depends on role");
-                } else if(gameMap.hasFriendNeighbour(registry, hexagonComponent.position, hexagonComponent.team)) {
+                } else if(gameMap.hasFriendNeighbour(registry, hexagonComponent.position, gameData.controllableTeam)) {
                     cocos2d::log("show: 3 buttons - buy worker, buy attack and buy defender");
                 } else {
                     cocos2d::log("show nothing");
@@ -347,9 +359,15 @@ namespace hk {
             });
         }
 
+        void onShowHexagonMenuEvent(const ShowHexagonMenuEvent& event) {
+            m_unprocessedEvents.push_back(event);
+        }
+
         //onFocused start fade out and lerp
     private:
         cocos2d::DrawNode* m_menuRenderer;
+
+        std::vector<ShowHexagonMenuEvent> m_unprocessedEvents;
     };
 }
 
