@@ -59,5 +59,21 @@ namespace hk {
 
         entt::entity hexagon;
     };
+
+    enum class MenuButtonType {
+        UPGRADE,
+        BUY_ATTACKER,
+        BUY_DEFENDER,
+        BUY_WORKER,
+        CANCEL
+    };
+
+    struct PressedMenuButttonEvent {
+        PressedMenuButttonEvent(entt::entity t_button, MenuButtonType t_type): button(t_button),
+                                                                               type(t_type) { }
+
+        entt::entity button;
+        MenuButtonType type;
+    };
 }
 #endif // EVENTS_H_INCLUDED

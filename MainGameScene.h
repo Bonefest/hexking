@@ -47,13 +47,6 @@ public:
 
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
 
-        //TEST
-        cocos2d::ui::Button* buyWorkerButton = cocos2d::ui::Button::create("HelloWorld.png");
-        buyWorkerButton->setTitleText("Buy worker");
-        buyWorkerButton->setPosition(cocos2d::Vec2(400, 400));
-
-        addChild(buyWorkerButton, 2);
-
         scheduleUpdate();
         return true;
     }

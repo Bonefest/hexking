@@ -24,7 +24,6 @@ namespace hk {
         bool initWithHexSize(float size) {
             if(!cocos2d::Node::init()) return false;
 
-            setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
 
             m_stencil = cocos2d::DrawNode::create();
 
