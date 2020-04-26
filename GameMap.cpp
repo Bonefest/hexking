@@ -14,13 +14,13 @@ namespace hk {
         m_gameMap[getIndex(hex)] = hexagon;
     }
 
-    entt::entity GameMap::getHexagon(cocos2d::Vec2 hex) {
+    entt::entity GameMap::getHexagon(cocos2d::Vec2 hex) const {
         if(isOutOfBounds(hex)) return entt::null;
 
         return m_gameMap[getIndex(hex)];
     }
 
-    entt::entity GameMap::getHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize) {
+    entt::entity GameMap::getHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize) const {
         return getHexagon(rectToHexCoords(pixel, hexSize));
     }
 
@@ -31,5 +31,29 @@ namespace hk {
     bool GameMap::isOutOfBounds(cocos2d::Vec2 hex) const {
         return (std::round(hex.x) < 0 || std::round(hex.x) >= m_size.first ||
                 std::round(hex.y) < 0 || std::round(hex.y) >= m_size.second);
+    }
+
+    bool GameMap::hasFriendNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const {
+        auto cube = hexToCube(hex);
+
+        cocos2d::Vec3 directions[] = {
+            cocos2d::Vec3( 0, 1,-1),
+            cocos2d::Vec3( 1, 0,-1),
+            cocos2d::Vec3( 1,-1, 0),
+            cocos2d::Vec3( 0,-1, 1),
+            cocos2d::Vec3(-1, 0, 1),
+            cocos2d::Vec3(-1, 1, 0)
+        };
+
+        for(cocos2d::Vec3 direction : directions) {
+            auto hexagon = getHexagon(cubeToHex(cube + direction));
+            if(!registry.valid(hexagon)) continue;
+
+            if(auto hexagonComponent = registry.try_get<Hexagon>(hexagon); hexagonComponent) {
+                if(hexagonComponent->team == friendTeam) return true;
+            }
+        }
+
+        return false;
     }
 }

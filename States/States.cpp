@@ -68,8 +68,10 @@ namespace hk {
                                                           hexToRectCoords(hexagonComponent.position,
                                                                           gameData.hexagonSize));
 
-            renderer->drawPolygon(fillVertices.data(), 6, getTeamColor(hexagonComponent.team), 0.0f, cocos2d::Color4F::BLACK);
-            renderer->drawPolygon(borderVertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.5f)));
+            float t = (std::sin(std::min(m_elapsedTime / hexagonRole->incomePeriod, 1.0f) * M_PI * 2.0f) + 1.0f) * 0.25f + 0.5f;
+
+            //renderer->drawPolygon(fillVertices.data(), 6, getTeamColor(hexagonComponent.team), 0.0f, cocos2d::Color4F::BLACK);
+            renderer->drawPolygon(borderVertices.data(), 6, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * t)), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
         }
     }
 

@@ -4,6 +4,7 @@
 #include "Dependencies/entt.hpp"
 #include "cocos2d.h"
 
+#include "Components/Components.h"
 
 namespace hk {
 
@@ -13,8 +14,8 @@ namespace hk {
     public:
         GameMap(map_size t_size);
 
-        entt::entity getHexagon(cocos2d::Vec2 hex);
-        entt::entity getHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize);
+        entt::entity getHexagon(cocos2d::Vec2 hex) const;
+        entt::entity getHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize) const;
 
         void setHexagon(cocos2d::Vec2 hex, entt::entity hexagon);
 
@@ -22,6 +23,8 @@ namespace hk {
 
         bool hasHexagon(cocos2d::Vec2 hex) const;
         bool hasHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize) const;
+
+        bool hasFriendNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const;
 
     private:
         int getIndex(cocos2d::Vec2 hex) const;

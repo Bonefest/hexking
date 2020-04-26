@@ -262,6 +262,8 @@ namespace hk {
                     registry.remove_if_exists<PressedHexagon>(event.hexagon);
 
                     cocos2d::log("trigger hexagon menu event!");
+
+                    //dispatcher.trigger<ShowHexagonMenuEvent>(event.hexagon);
                 }
 
             }
@@ -314,6 +316,40 @@ namespace hk {
         std::vector<HexagonCancelledEvent> m_unprocessedCanceledEvents;
 
         std::map<entt::entity, double> m_pressedHexagons;
+    };
+
+    class HexagonMenuSystem: public ISystem {
+    public:
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+
+            m_menuRenderer = cocos2d::DrawNode::create();
+            runningScene->addChild(m_menuRenderer);
+        }
+
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            m_menuRenderer->clear();
+
+            GameData& gameData = registry.ctx<GameData>();
+            GameMap& gameMap = registry.ctx<GameMap>();
+
+            registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon,
+                                                              Hexagon& hexagonComponent,
+                                                              FocusedHexagon& focusedComponent) {
+                cocos2d::log("%f %f", hexagonComponent.position.x, hexagonComponent.position.y);
+                if(hexagonComponent.team == gameData.controllableTeam) {
+                    cocos2d::log("show: upgrade button '+', and info inside other buttons depends on role");
+                } else if(gameMap.hasFriendNeighbour(registry, hexagonComponent.position, hexagonComponent.team)) {
+                    cocos2d::log("show: 3 buttons - buy worker, buy attack and buy defender");
+                } else {
+                    cocos2d::log("show nothing");
+                }
+            });
+        }
+
+        //onFocused start fade out and lerp
+    private:
+        cocos2d::DrawNode* m_menuRenderer;
     };
 }
 

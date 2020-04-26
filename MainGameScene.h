@@ -54,10 +54,6 @@ public:
 
         addChild(buyWorkerButton, 2);
 
-
-        HexagonRenderer* renderer = HexagonRenderer::create();
-        addChild(renderer, 10);
-
         scheduleUpdate();
         return true;
     }
@@ -87,8 +83,9 @@ public:
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonTouchHandleSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonTouchActionSystem>(), 1);
-        m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 2);
-        m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 3);
+        m_manager.addSystem(std::make_shared<hk::HexagonMenuSystem>(), 2);
+        m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 3);
+        m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 4);
     }
 
     void generatePlayers(int players) {

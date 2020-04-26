@@ -53,5 +53,11 @@ namespace hk {
         cocos2d::Touch touch;
         entt::entity hexagon;
     };
+
+    struct ShowHexagonMenuEvent {
+        ShowHexagonMenuEvent(entt::entity t_hexagon): hexagon(t_hexagon) { }
+
+        entt::entity hexagon;
+    };
 }
 #endif // EVENTS_H_INCLUDED
