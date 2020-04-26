@@ -17,6 +17,8 @@
 
 #include "ui/UIButton.h"
 
+#include "HexagonRenderer.h"
+
 class MainGameScene: public cocos2d::Scene {
 public:
     CREATE_FUNC(MainGameScene);
@@ -51,6 +53,10 @@ public:
         buyWorkerButton->setPosition(cocos2d::Vec2(400, 400));
 
         addChild(buyWorkerButton, 2);
+
+
+        HexagonRenderer* renderer = HexagonRenderer::create();
+        addChild(renderer, 10);
 
         scheduleUpdate();
         return true;
