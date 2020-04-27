@@ -1,6 +1,7 @@
 #ifndef SYSTEM_H_INCLUDED
 #define SYSTEM_H_INCLUDED
 
+#include <tuple>
 
 #include "../Dependencies/entt.hpp"
 #include "cocos2d.h"
@@ -420,12 +421,13 @@ namespace hk {
 
             Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
+            cocos2d::Vec2 hexagonOrigin = hexToRectCoords(hexagonComponent.position, gameData.hexagonSize);
+
             if(registry.has<HexagonRole>(hexagon)) {
 
-                HexagonNode* upgradeButtonNode = createButtonNode("upgrade.png", gameData.hexagonSize);
-
-                upgradeButtonNode->setPosition(hexToRectCoords(hexagonComponent.position,
-                                                           gameData.hexagonSize));
+                HexagonNode* upgradeButtonNode = createButtonNode("upgrade.png",
+                                                                  hexagonOrigin,
+                                                                  gameData.hexagonSize);
 
                 upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)),
                                                                     cocos2d::FadeIn::create(0.5f),
@@ -435,13 +437,34 @@ namespace hk {
 
                 m_buttons.push_back(button{upgradeButtonNode, std::make_shared<UpgradeCommand>()});
             } else {
+                //sprite name, animation moving direction, role
+                std::tuple<std::string, cocos2d::Vec2, Role> buttonsData[] = {
+                    {"worker.png", cocos2d::Vec2(-0.707f, 0.707f), Role::WORKER},
+                    {"attacker.png", cocos2d::Vec2(0.0f, 1.0f), Role::ATTACKER},
+                    {"defender.png", cocos2d::Vec2(0.707f, 0.707f), Role::DEFENDER}
+                };
 
+                for(auto data: buttonsData) {
+
+                    HexagonNode* purchaseWorkerButtonNode = createButtonNode(std::get<0>(data),
+                                                                             hexagonOrigin,
+                                                                             gameData.hexagonSize);
+
+                    purchaseWorkerButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, std::get<1>(data) * gameData.hexagonSize * 3.0f),
+                                                                        cocos2d::FadeIn::create(0.5f),
+                                                                        nullptr));
+
+
+                    runningScene->addChild(purchaseWorkerButtonNode, Constants::UI_LEVEL);
+                    m_buttons.push_back(button{purchaseWorkerButtonNode, std::make_shared<PurchaseCommand>(std::get<2>(data))});
+                }
             }
         }
 
-        HexagonNode* createButtonNode(const std::string& spriteName, float hexagonSize) {
+        HexagonNode* createButtonNode(const std::string& spriteName, cocos2d::Vec2 position, float hexagonSize) {
             HexagonNode* button = HexagonNode::createHexagon(hexagonSize * 1.25f);
 
+            button->setPosition(position);
             button->setColor(cocos2d::Color3B(0, 192, 192));
 
             cocos2d::Sprite* sprite = cocos2d::Sprite::create(spriteName);

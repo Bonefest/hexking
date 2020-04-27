@@ -22,7 +22,7 @@ namespace hk {
                 break;
             }
 
-            case Role::DEFENSER: {
+            case Role::DEFENDER: {
                 hexagonRole.hp = level * 20.0f;
                 hexagonRole.damage = level * 0.3f;
                 hexagonRole.income = 0.0f;

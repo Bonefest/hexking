@@ -3,7 +3,7 @@
 
 namespace hk {
 
-    enum class Role { ATTACKER, DEFENSER, WORKER };
+    enum class Role { ATTACKER, DEFENDER, WORKER };
 
     struct HexagonRole {
         explicit HexagonRole(Role role, int level);
