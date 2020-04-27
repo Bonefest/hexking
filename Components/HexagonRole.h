@@ -1,6 +1,8 @@
 #ifndef HEXAGONROLE_H_INCLUDED
 #define HEXAGONROLE_H_INCLUDED
 
+#include <string>
+
 namespace hk {
 
     enum class Role { ATTACKER, DEFENDER, WORKER };
@@ -21,6 +23,7 @@ namespace hk {
     };
 
     void calculateHexagonData(HexagonRole& hexagonRole);
+    std::string roleToSpriteName(Role role);
 }
 
 #endif // HEXAGONROLE_H_INCLUDED

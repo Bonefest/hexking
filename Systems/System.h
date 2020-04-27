@@ -32,6 +32,8 @@ namespace hk {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
             m_renderer = cocos2d::DrawNode::create();
             runningScene->addChild(m_renderer);
+
+            registry.on_construct<HexagonRole>().connect<&HexagonRenderingSystem::onHexagonRoleAssigned>(*this);
         }
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
@@ -56,6 +58,29 @@ namespace hk {
                 m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
             });
 
+        }
+
+        void onHexagonRoleAssigned(entt::registry& registry, entt::entity hexagon) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
+
+            if(hexagonComponent.icon != nullptr) {
+                hexagonComponent.icon->removeFromParentAndCleanup(true);
+                hexagonComponent.icon = nullptr;
+            }
+
+            HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(hexagon);
+            GameData& gameData = registry.ctx<GameData>();
+
+            cocos2d::Vec2 worldPosition = hexToRectCoords(hexagonComponent.position, gameData.hexagonSize);
+            cocos2d::Sprite* roleSprite = cocos2d::Sprite::create(roleToSpriteName(hexagonRoleComponent.role));
+            roleSprite->getTexture()->setAliasTexParameters();
+            roleSprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+            roleSprite->setPosition(worldPosition);
+
+            runningScene->addChild(roleSprite, 10);
+
+            hexagonComponent.icon = roleSprite;
         }
 
     private:
@@ -429,7 +454,7 @@ namespace hk {
                                                                   hexagonOrigin,
                                                                   gameData.hexagonSize);
 
-                upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)),
+                upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, gameData.hexagonSize * 3.0f)),
                                                                     cocos2d::FadeIn::create(0.5f),
                                                                     nullptr));
 
@@ -468,6 +493,7 @@ namespace hk {
             button->setColor(cocos2d::Color3B(0, 192, 192));
 
             cocos2d::Sprite* sprite = cocos2d::Sprite::create(spriteName);
+            sprite->getTexture()->setAliasTexParameters();
             sprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
             sprite->setContentSize(cocos2d::Size(hexagonSize, hexagonSize) * 1.25f);
 

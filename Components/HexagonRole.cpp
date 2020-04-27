@@ -39,4 +39,13 @@ namespace hk {
         }
     }
 
+    std::string roleToSpriteName(Role role) {
+        switch(role) {
+            case Role::ATTACKER: return "attacker.png";
+            case Role::DEFENDER: return "defender.png";
+            case Role::WORKER: return "worker.png";
+        }
+
+        return "";
+    }
 }

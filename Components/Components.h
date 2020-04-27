@@ -16,12 +16,14 @@ namespace hk {
 
     struct Hexagon {
         explicit Hexagon(cocos2d::Vec2 t_position, Team t_team = Team::NO_TEAM): position(t_position),
-                                                                                 team(t_team) { }
+                                                                                 team(t_team),
+                                                                                 icon(nullptr) { }
         cocos2d::Color4F displayColor;
         cocos2d::Vec2 position;
 
         Team team;
         StateOwner stateOwner;
+        cocos2d::Sprite* icon;
     };
 
     struct Player {

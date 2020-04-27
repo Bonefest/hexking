@@ -29,6 +29,9 @@ namespace hk {
                     hexagonRole->level++;
                     player.resources -= price;
                     calculateHexagonData(*hexagonRole);
+
+                    Hexagon& hexagonComponent = registry.get<Hexagon>(target);
+                    hexagonComponent.icon->setContentSize(hexagonComponent.icon->getContentSize() * 1.15f);
                 }
             }
         }
