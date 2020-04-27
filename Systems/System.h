@@ -319,6 +319,8 @@ namespace hk {
         std::map<entt::entity, double> m_pressedHexagons;
     };
 
+    typedef std::pair<HexagonNode*, std::shared_ptr<ICommand>> button;
+
     class HexagonMenuSystem: public ISystem {
     public:
         HexagonMenuSystem(): m_hexagonTarget(entt::null) { }
@@ -362,7 +364,7 @@ namespace hk {
             globalTouchLocation += touch->getLocation();
             globalTouchLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
 
-            for(auto button : m_buttonsInfo) {
+            for(auto button : m_buttons) {
                 cocos2d::Rect buttonRect = button.first->getBoundingBox();
                 buttonRect.origin -= button.first->getContentSize() * 0.5f;
                 if(buttonRect.containsPoint(globalTouchLocation)) {
@@ -419,35 +421,43 @@ namespace hk {
             Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
             if(registry.has<HexagonRole>(hexagon)) {
-                //NEED A FACTORY
-                HexagonNode* upgradeButton = HexagonNode::createHexagon(gameData.hexagonSize * 1.25f);
-                upgradeButton->setOpacity(0);
-                upgradeButton->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)), cocos2d::FadeIn::create(0.5f), nullptr));
 
-                upgradeButton->setPosition(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                upgradeButton->setColor(cocos2d::Color3B(0, 192, 192));
+                HexagonNode* upgradeButtonNode = createButtonNode("upgrade.png", gameData.hexagonSize);
 
-                cocos2d::Sprite* upgradeSprite = cocos2d::Sprite::create("upgrade.png");
-                upgradeSprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
-                upgradeSprite->setContentSize(cocos2d::Size(gameData.hexagonSize,
-                                                            gameData.hexagonSize) * 1.25f);
+                upgradeButtonNode->setPosition(hexToRectCoords(hexagonComponent.position,
+                                                           gameData.hexagonSize));
 
-                upgradeButton->addChild(upgradeSprite);
+                upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)),
+                                                                    cocos2d::FadeIn::create(0.5f),
+                                                                    nullptr));
 
-                runningScene->addChild(upgradeButton, 100);
+                runningScene->addChild(upgradeButtonNode, Constants::UI_LEVEL);
 
-                m_buttonsInfo.push_back({upgradeButton, std::make_shared<UpgradeCommand>()});
+                m_buttons.push_back(button{upgradeButtonNode, std::make_shared<UpgradeCommand>()});
             } else {
 
             }
         }
 
+        HexagonNode* createButtonNode(const std::string& spriteName, float hexagonSize) {
+            HexagonNode* button = HexagonNode::createHexagon(hexagonSize * 1.25f);
+
+            button->setColor(cocos2d::Color3B(0, 192, 192));
+
+            cocos2d::Sprite* sprite = cocos2d::Sprite::create(spriteName);
+            sprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+            sprite->setContentSize(cocos2d::Size(hexagonSize, hexagonSize) * 1.25f);
+
+            button->addChild(sprite);
+            return button;
+        }
+
         void clearButtons() {
-            for(auto button : m_buttonsInfo) {
+            for(auto button : m_buttons) {
                 button.first->removeFromParentAndCleanup(true);
             }
 
-            m_buttonsInfo.clear();
+            m_buttons.clear();
         }
 
         cocos2d::DrawNode* m_menuRenderer;
@@ -456,7 +466,7 @@ namespace hk {
         entt::entity m_hexagonTarget;
 
         std::vector<ShowHexagonMenuEvent> m_unprocessedEvents;
-        std::vector<std::pair<HexagonNode*, std::shared_ptr<ICommand>> > m_buttonsInfo;
+        std::vector<button> m_buttons;
 
         std::vector<std::shared_ptr<ICommand>> m_unprocessedCommands;
     };

@@ -9,6 +9,7 @@ namespace hk {
         };
 
         const static float BORDER_SIZE = 2.0f;
+        const static int UI_LEVEL = 100;
     }
 
 }
