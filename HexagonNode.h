@@ -24,16 +24,12 @@ namespace hk {
         bool initWithHexSize(float size) {
             if(!cocos2d::Node::init()) return false;
 
-
             m_stencil = cocos2d::DrawNode::create();
 
             m_gradient = cocos2d::LayerGradient::create();
             m_gradient->setVector(cocos2d::Vec2(0, 1));
 
-
-
             m_clipper = cocos2d::ClippingNode::create();
-            m_clipper->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
             m_clipper->setStencil(m_stencil);
             m_clipper->addChild(m_gradient);
 
@@ -57,6 +53,13 @@ namespace hk {
             m_gradient->setContentSize(getContentSize());
             m_gradient->setPosition(getContentSize() * (-0.5f));
             calculateHexagonStencil();
+        }
+
+        void setOpacity(GLubyte opacity) {
+            cocos2d::Node::setOpacity(opacity);
+
+            m_clipper->setOpacity(opacity);
+            m_gradient->setOpacity(opacity);
         }
 
     private:

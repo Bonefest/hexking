@@ -370,10 +370,10 @@ namespace hk {
 
         bool onTouchMenuButtonBegan(cocos2d::Touch* touch, cocos2d::Event* event) {
             auto globalTouchLocation = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera()->getPosition() + touch->getLocation() - cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
-            cocos2d::log("%f %f", globalTouchLocation.x, globalTouchLocation.y);
             for(auto button : m_buttonsInfo) {
-
-                if(button.first->getBoundingBox().containsPoint(globalTouchLocation)) {
+                cocos2d::Rect buttonRect = button.first->getBoundingBox();
+                buttonRect.origin -= button.first->getContentSize() * 0.5f;
+                if(buttonRect.containsPoint(globalTouchLocation)) {
                     cocos2d::log("clicked");
                     //dispatcher.trigger<PressedMenuButttonEvent>(focusedHexagonView.front(), button.second);
                     return true;
@@ -383,7 +383,6 @@ namespace hk {
             return false;
         }
 
-        //onFocused start fade out and lerp
     private:
         void processEvents(entt::registry& registry) {
             GameData& gameData = registry.ctx<GameData>();
@@ -413,8 +412,11 @@ namespace hk {
             Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
             if(registry.has<HexagonRole>(hexagon)) {
-                HexagonNode* upgradeButton = HexagonNode::createHexagon(gameData.hexagonSize);
-                upgradeButton->setPosition(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize) + cocos2d::Vec2(0, 100));
+                HexagonNode* upgradeButton = HexagonNode::createHexagon(gameData.hexagonSize * 1.25f);
+                upgradeButton->setOpacity(0);
+                upgradeButton->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)), cocos2d::FadeIn::create(0.5f), nullptr));
+
+                upgradeButton->setPosition(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
                 upgradeButton->setColor(cocos2d::Color3B(0, 192, 192));
 
                 runningScene->addChild(upgradeButton, 100);
