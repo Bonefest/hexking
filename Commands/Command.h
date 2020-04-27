@@ -23,7 +23,7 @@ namespace hk {
             Player& player = registry.get<Player>(sender);
 
             if(auto hexagonRole = registry.try_get<HexagonRole>(target); hexagonRole) {
-                //calculate price
+                //calculate price -> calculateUpgradePrice(role, level);
                 int price = -1;
                 if(hexagonRole->level >= 1 && hexagonRole->level < 6 && player.resources > price) {
                     hexagonRole->level++;
@@ -31,11 +31,32 @@ namespace hk {
                     calculateHexagonData(*hexagonRole);
                 }
             }
-
-            cocos2d::log("here");
         }
     };
 
+    class PurchaseCommand: public ICommand {
+    public:
+        PurchaseCommand(Role t_role): m_role(t_role) { }
+
+        virtual void execute(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity target, entt::entity sender) {
+            if(!registry.valid(target) || !registry.valid(sender)) return;
+
+            if(!registry.has<Player>(sender)) return;
+
+            Player& player = registry.get<Player>(sender);
+
+            int price = -1; //calculate price -> calculatePurchasePrice(role);
+            if(player.resources >= price) {
+                player.resources -= price;
+                registry.assign<HexagonRole>(target, m_role, 1);
+
+                Hexagon& hexagonComponent = registry.get<Hexagon>(target);
+                hexagonComponent.team = player.team;
+            }
+        }
+    private:
+        Role m_role;
+    };
 }
 
 #endif // COMMAND_H_INCLUDED

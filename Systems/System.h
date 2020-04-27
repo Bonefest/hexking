@@ -286,10 +286,12 @@ namespace hk {
                         registry.remove<PressedHexagon>(pressedHexagonIter->first);
 
                         pressedHexagonIter = m_pressedHexagons.erase(pressedHexagonIter);
+                        continue;
                     }
-                } else {
-                    pressedHexagonIter++;
+
                 }
+
+                pressedHexagonIter++;
             }
 
             m_unprocessedPressedEvents.clear();
