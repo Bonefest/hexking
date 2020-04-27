@@ -7,6 +7,7 @@
 
 
 #include "../Components/Components.h"
+#include "../Commands/Command.h"
 #include "../Events/Events.h"
 #include "../HexagonNode.h"
 #include "../GameMap.h"
@@ -46,7 +47,7 @@ namespace hk {
                 double t = std::min((getCurrentTimeInMs() - pressedHexagonComponent.pressingTime) / 1000.0, 1.0);
 
                 auto vertices = generateHexagonVertices(t * gameData.hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.75f, 0.75f, 0.75f, (t + 1.0f) * 0.5f), 0.0f, cocos2d::Color4F::BLACK);
+                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.75f, 0.75f, 0.75f, (t + 1.0f) * 0.25f + 0.25f), 0.0f, cocos2d::Color4F::BLACK);
             });
 
             registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, FocusedHexagon& focusedHexagonComponent){
@@ -318,6 +319,7 @@ namespace hk {
 
     class HexagonMenuSystem: public ISystem {
     public:
+        HexagonMenuSystem(): m_hexagonTarget(entt::null) { }
 
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
@@ -340,27 +342,12 @@ namespace hk {
             GameData& gameData = registry.ctx<GameData>();
             GameMap& gameMap = registry.ctx<GameMap>();
 
-
             processEvents(registry);
+            processCommands(registry, dispatcher);
 
-            bool hasView = false;
-            registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon,
-                                                              Hexagon& hexagonComponent,
-                                                              FocusedHexagon& focusedComponent) {
-
-                if(hexagonComponent.team == gameData.controllableTeam) {
-                    //cocos2d::log("show: upgrade button '+', and info inside other buttons depends on role");
-                } else if(gameMap.hasFriendNeighbour(registry, hexagonComponent.position, gameData.controllableTeam)) {
-                    //cocos2d::log("show: 3 buttons - buy worker, buy attack and buy defender");
-                } else {
-                    //cocos2d::log("show nothing");
-                }
-
-                hasView = true;
-            });
-
-            if(!hasView) {
+            if(registry.view<Hexagon, FocusedHexagon>().empty()) {
                 clearButtons();
+                m_hexagonTarget = entt::null;
             }
         }
 
@@ -369,13 +356,15 @@ namespace hk {
         }
 
         bool onTouchMenuButtonBegan(cocos2d::Touch* touch, cocos2d::Event* event) {
-            auto globalTouchLocation = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera()->getPosition() + touch->getLocation() - cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
+            auto globalTouchLocation = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera()->getPosition();
+            globalTouchLocation += touch->getLocation();
+            globalTouchLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
+
             for(auto button : m_buttonsInfo) {
                 cocos2d::Rect buttonRect = button.first->getBoundingBox();
                 buttonRect.origin -= button.first->getContentSize() * 0.5f;
                 if(buttonRect.containsPoint(globalTouchLocation)) {
-                    cocos2d::log("clicked");
-                    //dispatcher.trigger<PressedMenuButttonEvent>(focusedHexagonView.front(), button.second);
+                    m_unprocessedCommands.push_back(button.second);
                     return true;
                 }
             }
@@ -384,6 +373,19 @@ namespace hk {
         }
 
     private:
+        void processCommands(entt::registry& registry, entt::dispatcher& dispatcher) {
+            GameData& gameData = registry.ctx<GameData>();
+
+            if(!m_unprocessedCommands.empty()) {
+                registry.clear<FocusedHexagon>();
+
+                auto command = m_unprocessedCommands.back();
+                dispatcher.trigger<CommandEvent>(command, m_hexagonTarget, gameData.controllablePlayer);
+
+                m_unprocessedCommands.clear();
+            }
+        }
+
         void processEvents(entt::registry& registry) {
             GameData& gameData = registry.ctx<GameData>();
             GameMap& gameMap = registry.ctx<GameMap>();
@@ -392,6 +394,8 @@ namespace hk {
                 registry.clear<FocusedHexagon>();
 
                 auto hexagon = m_unprocessedEvents.back().hexagon;
+                m_hexagonTarget = hexagon;
+
                 Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
                 if(isFriendlyHexagon(registry, hexagon) ||
                    gameMap.hasFriendNeighbour(registry, hexagonComponent.position, gameData.controllableTeam)) {
@@ -402,6 +406,7 @@ namespace hk {
                 }
 
                 m_unprocessedEvents.clear();
+
             }
         }
 
@@ -412,6 +417,7 @@ namespace hk {
             Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
             if(registry.has<HexagonRole>(hexagon)) {
+                //NEED A FACTORY
                 HexagonNode* upgradeButton = HexagonNode::createHexagon(gameData.hexagonSize * 1.25f);
                 upgradeButton->setOpacity(0);
                 upgradeButton->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, 100.0f)), cocos2d::FadeIn::create(0.5f), nullptr));
@@ -419,9 +425,16 @@ namespace hk {
                 upgradeButton->setPosition(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
                 upgradeButton->setColor(cocos2d::Color3B(0, 192, 192));
 
+                cocos2d::Sprite* upgradeSprite = cocos2d::Sprite::create("upgrade.png");
+                upgradeSprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+                upgradeSprite->setContentSize(cocos2d::Size(gameData.hexagonSize,
+                                                            gameData.hexagonSize) * 1.25f);
+
+                upgradeButton->addChild(upgradeSprite);
+
                 runningScene->addChild(upgradeButton, 100);
 
-                m_buttonsInfo.push_back({upgradeButton, MenuButtonType::UPGRADE});
+                m_buttonsInfo.push_back({upgradeButton, std::make_shared<UpgradeCommand>()});
             } else {
 
             }
@@ -438,8 +451,35 @@ namespace hk {
         cocos2d::DrawNode* m_menuRenderer;
         cocos2d::EventListenerTouchOneByOne* m_touchListener;
 
+        entt::entity m_hexagonTarget;
+
         std::vector<ShowHexagonMenuEvent> m_unprocessedEvents;
-        std::vector<std::pair<HexagonNode*, MenuButtonType>> m_buttonsInfo;
+        std::vector<std::pair<HexagonNode*, std::shared_ptr<ICommand>> > m_buttonsInfo;
+
+        std::vector<std::shared_ptr<ICommand>> m_unprocessedCommands;
+    };
+
+    class CommandHandlingSystem: public ISystem {
+    public:
+        void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            dispatcher.sink<CommandEvent>().connect<&CommandHandlingSystem::onCommandEvent>(*this);
+        }
+
+        void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            for(auto commandEvent: m_unprocessedCommands) {
+                commandEvent.command->execute(registry, dispatcher, commandEvent.target, commandEvent.sender);
+            }
+
+            m_unprocessedCommands.clear();
+        }
+
+        void onCommandEvent(const CommandEvent& event) {
+            m_unprocessedCommands.push_back(event);
+        }
+
+    private:
+        std::vector<CommandEvent> m_unprocessedCommands;
+
     };
 }
 

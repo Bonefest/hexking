@@ -8,9 +8,10 @@
 #include "../Dependencies/entt.hpp"
 #include "../States/StateOwner.h"
 
+#include "HexagonRole.h"
+
 namespace hk {
 
-    enum class Role { ATTACKER, DEFENSER, WORKER };
     enum class Team { TEAM_1, TEAM_2, TEAM_3, TEAM_4, NO_TEAM };
 
     struct Hexagon {
@@ -21,54 +22,6 @@ namespace hk {
 
         Team team;
         StateOwner stateOwner;
-    };
-
-    struct HexagonRole {
-        explicit HexagonRole(Role t_role, int t_level): role(t_role),
-                                                        hp(0.0f),
-                                                        currentHp(0.0f),
-                                                        damage(0.0f),
-                                                        income(0.0f),
-                                                        incomePeriod(0.0f) {
-            //Call stats calculator function or class method
-
-            level = std::min(std::max(1, t_level), 6);
-
-            switch(t_role) {
-                case Role::ATTACKER: {
-                    currentHp = hp = t_level * 10.0f;
-                    damage = t_level * 1.0f;
-                    income = 0.0f;
-                    break;
-                }
-
-                case Role::DEFENSER: {
-                    currentHp = hp = t_level * 20.0f;
-                    damage = t_level * 0.3f;
-                    income = 0.0f;
-                    break;
-                }
-
-                case Role::WORKER: {
-                    currentHp = hp = t_level * 3.0f;
-                    damage = t_level * 0.1f;
-                    income = t_level * 10.0f;
-                    incomePeriod = 2.1f - t_level * 0.1f;
-                    break;
-                }
-            }
-        }
-
-        Role role;
-
-        float hp;
-        float currentHp;
-
-        float damage;
-        float income;
-        float incomePeriod;
-
-        int level;
     };
 
     struct Player {
@@ -97,7 +50,9 @@ namespace hk {
 
         int playersSize;
         std::map<Team, entt::entity> players;
+
         Team controllableTeam;
+        entt::entity controllablePlayer;
     };
 
 }

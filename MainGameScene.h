@@ -79,6 +79,7 @@ public:
         m_manager.addSystem(std::make_shared<hk::HexagonMenuSystem>(), 2);
         m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 3);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 4);
+        m_manager.addSystem(std::make_shared<hk::CommandHandlingSystem>(), 4);
     }
 
     void generatePlayers(int players) {
@@ -96,6 +97,7 @@ public:
         }
 
         gameData.controllableTeam = hk::Team::TEAM_1;
+        gameData.controllablePlayer = gameData.players[gameData.controllableTeam];
     }
 
     void generateGrid() {
