@@ -463,25 +463,25 @@ namespace hk {
                 m_buttons.push_back(button{upgradeButtonNode, std::make_shared<UpgradeCommand>()});
             } else {
                 //sprite name, animation moving direction, role
-                std::tuple<std::string, cocos2d::Vec2, Role> buttonsData[] = {
-                    {"worker.png", cocos2d::Vec2(-0.707f, 0.707f), Role::WORKER},
-                    {"attacker.png", cocos2d::Vec2(0.0f, 1.0f), Role::ATTACKER},
-                    {"defender.png", cocos2d::Vec2(0.707f, 0.707f), Role::DEFENDER}
+                std::pair<cocos2d::Vec2, Role> buttonsData[] = {
+                    {cocos2d::Vec2(-0.707f, 0.707f), Role::WORKER},
+                    {cocos2d::Vec2(0.0f, 1.0f), Role::ATTACKER},
+                    {cocos2d::Vec2(0.707f, 0.707f), Role::DEFENDER}
                 };
 
                 for(auto data: buttonsData) {
 
-                    HexagonNode* purchaseWorkerButtonNode = createButtonNode(std::get<0>(data),
+                    HexagonNode* purchaseWorkerButtonNode = createButtonNode(roleToSpriteName(std::get<1>(data)),
                                                                              hexagonOrigin,
                                                                              gameData.hexagonSize);
 
-                    purchaseWorkerButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, std::get<1>(data) * gameData.hexagonSize * 3.0f),
+                    purchaseWorkerButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, std::get<0>(data) * gameData.hexagonSize * 3.0f),
                                                                         cocos2d::FadeIn::create(0.5f),
                                                                         nullptr));
 
 
                     runningScene->addChild(purchaseWorkerButtonNode, Constants::UI_LEVEL);
-                    m_buttons.push_back(button{purchaseWorkerButtonNode, std::make_shared<PurchaseCommand>(std::get<2>(data))});
+                    m_buttons.push_back(button{purchaseWorkerButtonNode, std::make_shared<PurchaseCommand>(std::get<1>(data))});
                 }
             }
         }
@@ -523,6 +523,7 @@ namespace hk {
     class WarSystem: public ISystem {
     public:
         WarSystem():m_elapsedTime(0.0f) { }
+
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
 
             m_elapsedTime+= delta;
