@@ -78,6 +78,7 @@ public:
         m_manager.addSystem(std::make_shared<hk::HexagonTouchActionSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonMenuSystem>(), 2);
         m_manager.addSystem(std::make_shared<hk::HexagonUpdatingSystem>(), 3);
+        m_manager.addSystem(std::make_shared<hk::WarSystem>(), 3);
         m_manager.addSystem(std::make_shared<hk::InputHandlingSystem>(), 4);
         m_manager.addSystem(std::make_shared<hk::CommandHandlingSystem>(), 4);
     }

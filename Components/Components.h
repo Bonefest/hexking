@@ -27,7 +27,7 @@ namespace hk {
     };
 
     struct FightingHexagon {
-
+        char pass;
     };
 
     struct Player {
@@ -45,7 +45,7 @@ namespace hk {
     };
 
     struct FocusedHexagon {
-        int a;
+        char pass;
         //pressingTime;
     };
 

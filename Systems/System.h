@@ -522,17 +522,43 @@ namespace hk {
 
     class WarSystem: public ISystem {
     public:
+        WarSystem():m_elapsedTime(0.0f) { }
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+
+            m_elapsedTime+= delta;
+            if(m_elapsedTime < 0.5f) return;
+
             GameMap& gameMap = registry.ctx<GameMap>();
 
             auto [width, height] = gameMap.getSize();
 
             for(int y = 0; y < height; y++) {
                 for(int x = 0; x < width; x++) {
+                    cocos2d::Vec2 position(x, y);
+                    auto hexagon = gameMap.getHexagon(position);
 
+                    if(registry.valid(hexagon)) {
+                        Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
+                        if(hexagonComponent.team == Team::NO_TEAM) continue;
+
+                        if(registry.has<FightingHexagon>(hexagon)) {
+                            if(!gameMap.hasEnemyNeighbour(registry, position, hexagonComponent.team)) {
+                                registry.remove<FightingHexagon>(hexagon);
+                                //?trigger WarFinishedEvent?
+                            }
+                        } else if(gameMap.hasEnemyNeighbour(registry, position, hexagonComponent.team)) {
+                            registry.assign<FightingHexagon>(hexagon);
+                            hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<HexagonAttack>());
+                            //?trigger WarStartedEvent?
+                        }
+                    }
                 }
             }
+
+            m_elapsedTime = 0.0f;
         }
+    private:
+        float m_elapsedTime;
 
     };
 
