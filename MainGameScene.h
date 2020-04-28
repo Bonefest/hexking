@@ -132,7 +132,6 @@ public:
             auto hexagon = gameMap.getHexagon(startPosition);
             registry.assign<hk::HexagonRole>(hexagon, hk::Role::WORKER, 1);
             registry.get<hk::Hexagon>(hexagon).team = hk::Team(i);
-            registry.get<hk::Hexagon>(hexagon).stateOwner.setState(registry, hexagon, std::make_shared<hk::HexagonAttack>());
         }
     }
 

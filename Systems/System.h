@@ -520,6 +520,22 @@ namespace hk {
         std::vector<std::shared_ptr<ICommand>> m_unprocessedCommands;
     };
 
+    class WarSystem: public ISystem {
+    public:
+        virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            GameMap& gameMap = registry.ctx<GameMap>();
+
+            auto [width, height] = gameMap.getSize();
+
+            for(int y = 0; y < height; y++) {
+                for(int x = 0; x < width; x++) {
+
+                }
+            }
+        }
+
+    };
+
     class CommandHandlingSystem: public ISystem {
     public:
         void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {

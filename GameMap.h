@@ -25,6 +25,9 @@ namespace hk {
         bool hasHexagonAtPixel(cocos2d::Vec2 pixel, float hexSize) const;
 
         bool hasFriendNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const;
+        bool hasEnemyNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const;
+
+        std::vector<entt::entity> getNeighbours(entt::registry& registry, cocos2d::Vec2 hex) const;
 
     private:
         int getIndex(cocos2d::Vec2 hex) const;

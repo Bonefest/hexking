@@ -34,6 +34,35 @@ namespace hk {
     }
 
     bool GameMap::hasFriendNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const {
+        auto neighbours = getNeighbours(registry, hex);
+
+        for(auto neighbour: neighbours) {
+            if(auto hexagonComponent = registry.try_get<Hexagon>(neighbour); hexagonComponent) {
+                if(hexagonComponent->team == friendTeam) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool GameMap::hasEnemyNeighbour(entt::registry& registry, cocos2d::Vec2 hex, Team friendTeam) const {
+        auto neighbours = getNeighbours(registry, hex);
+
+        for(auto neighbour: neighbours) {
+            if(auto hexagonComponent = registry.try_get<Hexagon>(neighbour); hexagonComponent) {
+                if(hexagonComponent->team != friendTeam && hexagonComponent->team != Team::NO_TEAM) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    std::vector<entt::entity> GameMap::getNeighbours(entt::registry& registry, cocos2d::Vec2 hex) const {
         auto cube = hexToCube(hex);
 
         cocos2d::Vec3 directions[] = {
@@ -45,17 +74,15 @@ namespace hk {
             cocos2d::Vec3(-1, 1, 0)
         };
 
+        std::vector<entt::entity> result;
+
         for(cocos2d::Vec3 direction : directions) {
             auto hexagon = getHexagon(cubeToHex(cube + direction));
             if(!registry.valid(hexagon)) continue;
 
-            if(auto hexagonComponent = registry.try_get<Hexagon>(hexagon); hexagonComponent) {
-                if(hexagonComponent->team == friendTeam) {
-                    return true;
-                }
-            }
+            result.push_back(hexagon);
         }
 
-        return false;
+        return result;
     }
 }
