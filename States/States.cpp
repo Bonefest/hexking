@@ -48,6 +48,10 @@ namespace hk {
 
 
 
+
+
+
+
     void HexagonWorkerIdle::draw(cocos2d::DrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
         if(auto* hexagonRole = registry.try_get<HexagonRole>(hexagon); hexagonRole) {
             if(hexagonRole->role != Role::WORKER) return;
@@ -61,16 +65,12 @@ namespace hk {
                 hexagonFillSize = m_elapsedTime / hexagonRole->incomePeriod * gameData.hexagonSize;
             }
 
-            auto fillVertices = generateHexagonVertices(hexagonFillSize,
-                                                        hexToRectCoords(hexagonComponent.position,
-                                                                        gameData.hexagonSize));
             auto borderVertices = generateHexagonVertices(gameData.hexagonSize,
                                                           hexToRectCoords(hexagonComponent.position,
                                                                           gameData.hexagonSize));
 
             float t = (std::sin(std::min(m_elapsedTime / hexagonRole->incomePeriod, 1.0f) * M_PI * 2.0f) + 1.0f) * 0.25f + 0.5f;
 
-            //renderer->drawPolygon(fillVertices.data(), 6, getTeamColor(hexagonComponent.team), 0.0f, cocos2d::Color4F::BLACK);
             renderer->drawPolygon(borderVertices.data(), 6, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * t)), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
         }
     }
@@ -88,4 +88,54 @@ namespace hk {
     }
 
 
+
+
+
+    void HexagonAttack::draw(cocos2d::DrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
+        GameData& gameData = registry.ctx<GameData>();
+        Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
+        HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(hexagon);
+
+
+        float t = 1.0f;
+
+        if(m_attacking) {
+            if(hexagonRoleComponent.attackPeriod > 0.01f) {
+                t = std::pow(std::min(m_attackElapsedTime / hexagonRoleComponent.attackPeriod, 1.0f), 4.0f);
+            }
+        } else {
+           if(hexagonRoleComponent.attackCooldown > 0.01f) {
+                t = 1.0f - std::pow(std::min(m_cooldownElapsedTime / hexagonRoleComponent.attackCooldown, 1.0f), 2.0f);
+           }
+        }
+
+        float hexagonSize = gameData.hexagonSize + gameData.hexagonSize * 0.25f * t;
+
+        auto vertices = generateHexagonVertices(hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
+
+        renderer->drawPolygon(vertices.data(), 6, getTeamColor(hexagonComponent.team), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
+    }
+
+    void HexagonAttack::update(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity hexagon, float delta) {
+        //if don't have attacking component -> change to hexagon idle
+
+        HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(hexagon);
+        if(m_attacking) {
+            m_attackElapsedTime += delta;
+            if(m_attackElapsedTime > hexagonRoleComponent.attackPeriod) {
+                //dispatcher.trigger<onHexagonAttackEvent>(hexagon);
+
+                m_attackElapsedTime = 0.0f;
+                m_attacking = false;
+            }
+        } else {
+            m_cooldownElapsedTime += delta;
+            if(m_cooldownElapsedTime > hexagonRoleComponent.attackCooldown) {
+
+                m_cooldownElapsedTime = 0.0f;
+                m_attacking = true;
+            }
+        }
+
+    }
 }

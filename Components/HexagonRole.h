@@ -16,6 +16,9 @@ namespace hk {
         float currentHp;
 
         float damage;
+        float attackCooldown;
+        float attackPeriod;
+
         float income;
         float incomePeriod;
 

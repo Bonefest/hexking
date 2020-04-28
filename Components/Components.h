@@ -26,6 +26,10 @@ namespace hk {
         cocos2d::Sprite* icon;
     };
 
+    struct FightingHexagon {
+
+    };
+
     struct Player {
         explicit Player(Team t_team): team(t_team),
                                       resources(0) { }
