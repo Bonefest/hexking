@@ -81,6 +81,12 @@ namespace hk {
         entt::entity sender;
     };
 
+    struct HexagonDamageCausedEvent {
+        HexagonDamageCausedEvent(entt::entity t_hexagon): hexagon(t_hexagon) { }
+
+        entt::entity hexagon;
+    };
+
 
 }
 #endif // EVENTS_H_INCLUDED

@@ -524,7 +524,13 @@ namespace hk {
     public:
         WarSystem():m_elapsedTime(0.0f) { }
 
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            dispatcher.sink<HexagonDamageCausedEvent>().connect<&WarSystem::onDamageCaused>(*this);
+        }
+
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+
+
 
             m_elapsedTime+= delta;
             if(m_elapsedTime < 0.5f) return;
@@ -558,8 +564,24 @@ namespace hk {
 
             m_elapsedTime = 0.0f;
         }
+
+        void onDamageCaused(const HexagonDamageCausedEvent& event) {
+            m_unprocessedEvents.push_back(event);
+        }
+
     private:
+        void processEvents(entt::registry& registry) {
+            for(auto event: m_unprocessedEvents) {
+                if(auto hexagonRoleComponent = registry.try_get<HexagonRole>(event.hexagon); hexagonRoleComponent) {
+                    if(hexagonRoleComponent->currentHp < 0.0f) {
+                        /* TODO */
+                    }
+                }
+            }
+        }
+
         float m_elapsedTime;
+        std::vector<HexagonDamageCausedEvent> m_unprocessedEvents;
 
     };
 
