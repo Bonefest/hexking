@@ -616,14 +616,14 @@ namespace hk {
             floatingText->setPosition(event.position);
             floatingText->setTextColor(event.color);
 
-            float spawningTime = random::random_real(0.5, 1.0);
-            cocos2d::Vec2 spawningEndPosition = cocos2d::Vec2(random::random_real(-0.5, 0.5), 1) * random::random_real(50.0, 150.0);
+            float spawningTime = random::random_real(1.0, 1.5);
+            cocos2d::Vec2 spawningEndPosition = cocos2d::Vec2(random::random_real(-0.2, 0.2), 1) * random::random_real(120.0, 150.0);
 
-            floatingText->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(spawningTime,
-                                                                           spawningEndPosition),
-                                                            cocos2d::FadeOut::create(spawningTime),
-                                                            nullptr));
+            auto spawnAction = cocos2d::Spawn::create(cocos2d::MoveBy::create(spawningTime,spawningEndPosition),
+                                                      cocos2d::FadeOut::create(spawningTime),
+                                                      nullptr);
 
+            floatingText->runAction(cocos2d::Sequence::create(spawnAction, cocos2d::RemoveSelf::create(true), nullptr));
             runningScene->addChild(floatingText, 5);
 
         }

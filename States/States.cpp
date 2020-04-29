@@ -109,7 +109,7 @@ namespace hk {
         float hexagonSize = gameData.hexagonSize + gameData.hexagonSize * 0.25f * t;
 
         renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
-                              gameData.hexagonSize,
+                              hexagonSize,
                               getTeamColor(hexagonComponent.team),
                               cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
     }

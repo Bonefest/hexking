@@ -2,7 +2,7 @@
 
 #include "../Events/Events.h"
 #include "../GameMap.h"
-
+#include "../helper.h"
 
 namespace hk {
 
@@ -79,7 +79,6 @@ namespace hk {
 
             iter++;
         }
-        cocos2d::log("here %u", enemyNeighbours.size());
 
         if(enemyNeighbours.empty())
 
@@ -113,10 +112,14 @@ namespace hk {
                                entt::entity target,
                                entt::entity striker,
                                float damage) {
+        GameData& gameData = registry.ctx<GameData>();
+        Hexagon& targetHexagonComponent = registry.get<Hexagon>(target);
         HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(target);
         hexagonRoleComponent.currentHp -= damage;
         dispatcher.trigger<HexagonDamageCausedEvent>(target, striker);
-        //dispatcher.trigger<CreateFloatTextEvent>("..some text..", target position + rand, Color4F::RED);
+        dispatcher.trigger<CreateFloatTextEvent>(cocos2d::StringUtils::format("-%.1f", damage),
+                                                 hexToRectCoords(targetHexagonComponent.position, gameData.hexagonSize),
+                                                 cocos2d::Color4B(getTeamColor(targetHexagonComponent.team)), 32.0f);
     }
 
 
