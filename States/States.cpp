@@ -1,6 +1,8 @@
 #include "States.h"
 #include "../Components/Components.h"
 
+
+#include "../Events/Events.h"
 #include "../helper.h"
 #include "../common.h"
 
@@ -123,7 +125,7 @@ namespace hk {
         if(m_attacking) {
             m_attackElapsedTime += delta;
             if(m_attackElapsedTime > hexagonRoleComponent.attackPeriod) {
-                //dispatcher.trigger<onHexagonAttackEvent>(hexagon);
+                dispatcher.trigger<CommandEvent>(std::make_shared<AttackCommand>(), entt::null, hexagon);
 
                 m_attackElapsedTime = 0.0f;
                 m_attacking = false;

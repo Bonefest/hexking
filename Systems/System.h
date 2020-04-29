@@ -530,7 +530,7 @@ namespace hk {
 
         virtual void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
 
-
+            processEvents(registry);
 
             m_elapsedTime+= delta;
             if(m_elapsedTime < 0.5f) return;
@@ -572,12 +572,17 @@ namespace hk {
     private:
         void processEvents(entt::registry& registry) {
             for(auto event: m_unprocessedEvents) {
-                if(auto hexagonRoleComponent = registry.try_get<HexagonRole>(event.hexagon); hexagonRoleComponent) {
-                    if(hexagonRoleComponent->currentHp < 0.0f) {
-                        /* TODO */
+                if(auto targetRoleComponent = registry.try_get<HexagonRole>(event.target); targetRoleComponent) {
+                    if(targetRoleComponent->currentHp < 0.0f) {
+                        auto strikerHexagonComponent = registry.get<Hexagon>(event.striker);
+                        auto targetHexagonComponent = registry.get<Hexagon>(event.target);
+
+                        targetRoleComponent->currentHp = targetRoleComponent->hp * 0.1f;
                     }
                 }
             }
+
+            m_unprocessedEvents.clear();
         }
 
         float m_elapsedTime;

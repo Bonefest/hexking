@@ -3,8 +3,9 @@
 
 #include "Dependencies/entt.hpp"
 #include "cocos2d.h"
-
 #include <memory>
+
+#include "../Commands/Command.h"
 
 namespace hk {
     struct TouchBeganEvent {
@@ -82,9 +83,11 @@ namespace hk {
     };
 
     struct HexagonDamageCausedEvent {
-        HexagonDamageCausedEvent(entt::entity t_hexagon): hexagon(t_hexagon) { }
+        HexagonDamageCausedEvent(entt::entity t_target, entt::entity t_striker): target(t_target),
+                                                                                 striker(t_striker) { }
 
-        entt::entity hexagon;
+        entt::entity target;
+        entt::entity striker;
     };
 
 

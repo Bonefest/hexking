@@ -11,6 +11,7 @@ namespace hk {
                                                             incomePeriod(0.0f),
                                                             level(t_level) {
         calculateHexagonData(*this);
+        currentHp = hp;
     }
 
     void calculateHexagonData(HexagonRole& hexagonRole) {
