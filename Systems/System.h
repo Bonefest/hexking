@@ -9,6 +9,7 @@
 
 #include "../Components/Components.h"
 #include "../Commands/Command.h"
+#include "../HexagonDrawNode.h"
 #include "../Events/Events.h"
 #include "../HexagonNode.h"
 #include "../GameMap.h"
@@ -30,7 +31,7 @@ namespace hk {
 
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
-            m_renderer = cocos2d::DrawNode::create();
+            m_renderer = HexagonDrawNode::createNode();
             runningScene->addChild(m_renderer);
 
             registry.on_construct<HexagonRole>().connect<&HexagonRenderingSystem::onHexagonRoleAssigned>(*this);
@@ -45,17 +46,25 @@ namespace hk {
             });
 
             GameData& gameData = registry.ctx<GameData>();
+            float hexagonSize = gameData.hexagonSize;
             registry.view<Hexagon, PressedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, PressedHexagon& pressedHexagonComponent){
 
                 double t = std::min((getCurrentTimeInMs() - pressedHexagonComponent.pressingTime) / 1000.0, 1.0);
 
-                auto vertices = generateHexagonVertices(t * gameData.hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0.75f, 0.75f, 0.75f, (t + 1.0f) * 0.25f + 0.25f), 0.0f, cocos2d::Color4F::BLACK);
+                m_renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, hexagonSize),
+                                        hexagonSize,
+                                        cocos2d::Color4F(0.75f, 0.75f, 0.75f, (t + 1.0f) * 0.25f + 0.25f),
+                                        cocos2d::Color4F::BLACK,
+                                        0.0f);
             });
 
             registry.view<Hexagon, FocusedHexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent, FocusedHexagon& focusedHexagonComponent){
-                auto vertices = generateHexagonVertices(gameData.hexagonSize + 1.0f, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-                m_renderer->drawPolygon(vertices.data(), 6, cocos2d::Color4F(0, 0, 0, 0), 3.0f, cocos2d::Color4F(0.0f, 1.0f, 1.0f, (std::sin(m_elapsedTime) + 1.0f) * 0.25f + 0.5f));
+                double t = (std::sin(m_elapsedTime) + 1.0f);
+                m_renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, hexagonSize),
+                                        hexagonSize,
+                                        cocos2d::Color4F(0, 0, 0, 0),
+                                        cocos2d::Color4F(0.0f, 1.0f, 1.0f, t * 0.25f + 0.5f),
+                                        3.0f);
             });
 
         }
@@ -84,7 +93,7 @@ namespace hk {
         }
 
     private:
-        cocos2d::DrawNode* m_renderer;
+        HexagonDrawNode* m_renderer;
         float m_elapsedTime;
 
         /*

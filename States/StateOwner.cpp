@@ -1,6 +1,5 @@
 
 #include "StateOwner.h"
-
 #include <memory>
 
 using std::make_shared;
@@ -15,7 +14,7 @@ namespace hk {
 		m_currentState->onBegin(registry, hexagon);
 	}
 
-    void StateOwner::draw(cocos2d::DrawNode* drawNode, entt::registry& registry, entt::entity hexagon) {
+    void StateOwner::draw(HexagonDrawNode* drawNode, entt::registry& registry, entt::entity hexagon) {
         m_currentState->draw(drawNode, registry, hexagon);
     }
 

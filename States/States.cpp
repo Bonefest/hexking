@@ -12,12 +12,10 @@ namespace hk {
         findNextState(registry, hexagon);
     }
 
-    void HexagonIdle::draw(cocos2d::DrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
+    void HexagonIdle::draw(HexagonDrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
         GameData& gameData = registry.ctx<GameData>();
         Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
-        auto vertices = generateHexagonVertices(gameData.hexagonSize,
-                                                hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
         cocos2d::Color4F fillColor(0.0f, 0.0f, 0.0f, 0.0f);
         cocos2d::Color4F borderColor = cocos2d::Color4F::WHITE;
         if(hexagonComponent.team != Team::NO_TEAM) {
@@ -27,10 +25,9 @@ namespace hk {
 
         //if has role -> draw one more polygon with size equal to fraction hp/maxHp * hexagonSize
 
-        renderer->drawPolygon(vertices.data(),
-                              6,
+        renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
+                              gameData.hexagonSize,
                               fillColor,
-                              Constants::BORDER_SIZE,
                               borderColor);
     }
 
@@ -54,26 +51,24 @@ namespace hk {
 
 
 
-    void HexagonWorkerIdle::draw(cocos2d::DrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
+    void HexagonWorkerIdle::draw(HexagonDrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
         if(auto* hexagonRole = registry.try_get<HexagonRole>(hexagon); hexagonRole) {
             if(hexagonRole->role != Role::WORKER) return;
 
+            GameData& gameData = registry.ctx<GameData>();
             Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
 
-            GameData& gameData = registry.ctx<GameData>();
-
-            float hexagonFillSize = gameData.hexagonSize;
-            if(hexagonRole->incomePeriod > 0.01f) {
-                hexagonFillSize = m_elapsedTime / hexagonRole->incomePeriod * gameData.hexagonSize;
-            }
-
-            auto borderVertices = generateHexagonVertices(gameData.hexagonSize,
-                                                          hexToRectCoords(hexagonComponent.position,
-                                                                          gameData.hexagonSize));
-
             float t = (std::sin(std::min(m_elapsedTime / hexagonRole->incomePeriod, 1.0f) * M_PI * 2.0f) + 1.0f) * 0.25f + 0.5f;
+            cocos2d::Color4F fillColor = getTeamColor(hexagonComponent.team) * t;
+            cocos2d::Color4F borderColor = fillColor * 0.5f;
+            fillColor.a = borderColor.a = 1.0f;
 
-            renderer->drawPolygon(borderVertices.data(), 6, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * t)), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
+            renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
+                                  gameData.hexagonSize,
+                                  fillColor,
+                                  borderColor);
+
+
         }
     }
 
@@ -93,7 +88,7 @@ namespace hk {
 
 
 
-    void HexagonAttack::draw(cocos2d::DrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
+    void HexagonAttack::draw(HexagonDrawNode* renderer, entt::registry& registry, entt::entity hexagon) {
         GameData& gameData = registry.ctx<GameData>();
         Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
         HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(hexagon);
@@ -113,9 +108,10 @@ namespace hk {
 
         float hexagonSize = gameData.hexagonSize + gameData.hexagonSize * 0.25f * t;
 
-        auto vertices = generateHexagonVertices(hexagonSize, hexToRectCoords(hexagonComponent.position, gameData.hexagonSize));
-
-        renderer->drawPolygon(vertices.data(), 6, getTeamColor(hexagonComponent.team), Constants::BORDER_SIZE, cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
+        renderer->drawHexagon(hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
+                              gameData.hexagonSize,
+                              getTeamColor(hexagonComponent.team),
+                              cocos2d::Color4F(cocos2d::Color3B(getTeamColor(hexagonComponent.team) * 0.40f)));
     }
 
     void HexagonAttack::update(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity hexagon, float delta) {

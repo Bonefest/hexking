@@ -4,6 +4,7 @@
 #include "../Dependencies/entt.hpp"
 #include "cocos2d.h"
 
+#include "../HexagonDrawNode.h"
 #include "States.h"
 
 namespace hk {
@@ -14,7 +15,7 @@ namespace hk {
 
         void setState(entt::registry& registry, entt::entity hexagon, std::shared_ptr<IHexagonState> state);
 
-        void draw(cocos2d::DrawNode* drawNode, entt::registry& registry, entt::entity hexagon);
+        void draw(HexagonDrawNode* drawNode, entt::registry& registry, entt::entity hexagon);
         void update(entt::registry& registry, entt::dispatcher& dispatcher, entt::entity hexagon, float delta);
 
     private:
