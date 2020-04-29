@@ -5,7 +5,9 @@ namespace hk {
 
     namespace Constants {
         enum Tags {
-            ScrollWorldContainer = 1
+            ScrollWorldContainer = 1,
+
+            WorldCamera,
         };
 
         const static char* DEFAULT_FONT = "fonts/arial.ttf";

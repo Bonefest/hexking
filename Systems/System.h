@@ -34,6 +34,7 @@ namespace hk {
         virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
             auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
             m_renderer = HexagonDrawNode::createNode();
+            m_renderer->setCameraMask((unsigned int)cocos2d::CameraFlag::USER1);
             runningScene->addChild(m_renderer);
 
             registry.on_construct<HexagonRole>().connect<&HexagonRenderingSystem::onHexagonRoleAssigned>(*this);
@@ -89,6 +90,7 @@ namespace hk {
             roleSprite->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
             roleSprite->setPosition(worldPosition);
 
+            roleSprite->setCameraMask((unsigned short)cocos2d::CameraFlag::USER1);
             runningScene->addChild(roleSprite, 10);
 
             hexagonComponent.icon = roleSprite;
@@ -146,7 +148,7 @@ namespace hk {
                     case event_code::MOVED: {
                         dispatcher.trigger<TouchMovedEvent>(ed.second);
 
-                        auto camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+                        auto camera = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::WorldCamera);
                         camera->setPosition(camera->getPosition() - ed.second.getDelta());
 
                         break;
@@ -261,7 +263,7 @@ namespace hk {
         }
     private:
         cocos2d::Vec2 getTouchWorldLocation(cocos2d::Touch touch) {
-            cocos2d::Camera* camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+            cocos2d::Node* camera = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::WorldCamera);
             cocos2d::Vec2 worldLocation = camera->getPosition();
             worldLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
             worldLocation += touch.getLocation();
@@ -290,7 +292,7 @@ namespace hk {
             for(auto event: m_unprocessedPressedEvents) {
                 m_pressedHexagons[event.hexagon] = getCurrentTimeInMs();
                 if(isFriendlyHexagon(registry, event.hexagon))
-                    registry.assign_or_replace<PressedHexagon>(event.hexagon, getCurrentTimeInMs());
+                    registry.emplace_or_replace<PressedHexagon>(event.hexagon, getCurrentTimeInMs());
             }
 
             for(auto event: m_unprocessedReleasedEvents) {
@@ -397,7 +399,7 @@ namespace hk {
         }
 
         bool onTouchMenuButtonBegan(cocos2d::Touch* touch, cocos2d::Event* event) {
-            auto globalTouchLocation = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera()->getPosition();
+            auto globalTouchLocation = cocos2d::Director::getInstance()->getRunningScene()->getChildByTag(Constants::WorldCamera)->getPosition();
             globalTouchLocation += touch->getLocation();
             globalTouchLocation -= cocos2d::Director::getInstance()->getVisibleSize() * 0.5f;
 
@@ -442,7 +444,7 @@ namespace hk {
                    gameMap.hasFriendNeighbour(registry, hexagonComponent.position, gameData.controllableTeam)) {
                     clearButtons();
 
-                    registry.assign_or_replace<FocusedHexagon>(hexagon);
+                    registry.emplace_or_replace<FocusedHexagon>(hexagon);
                     generateButtons(registry, hexagon);
                 }
 
@@ -470,6 +472,7 @@ namespace hk {
                                                                     nullptr));
 
                 runningScene->addChild(upgradeButtonNode, Constants::UI_LEVEL);
+                upgradeButtonNode->setCameraMask((unsigned short)cocos2d::CameraFlag::USER1, true);
 
                 m_buttons.push_back(button{upgradeButtonNode, std::make_shared<UpgradeCommand>()});
             } else {
@@ -490,7 +493,7 @@ namespace hk {
                                                                         cocos2d::FadeIn::create(0.5f),
                                                                         nullptr));
 
-
+                    purchaseWorkerButtonNode->setCameraMask((unsigned short)cocos2d::CameraFlag::USER1);
                     runningScene->addChild(purchaseWorkerButtonNode, Constants::UI_LEVEL);
                     m_buttons.push_back(button{purchaseWorkerButtonNode, std::make_shared<PurchaseCommand>(std::get<1>(data))});
                 }
@@ -562,10 +565,11 @@ namespace hk {
                         if(registry.has<FightingHexagon>(hexagon)) {
                             if(!gameMap.hasEnemyNeighbour(registry, position, hexagonComponent.team)) {
                                 registry.remove<FightingHexagon>(hexagon);
+                                hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<HexagonIdle>());
                                 //?trigger WarFinishedEvent?
                             }
                         } else if(gameMap.hasEnemyNeighbour(registry, position, hexagonComponent.team)) {
-                            registry.assign<FightingHexagon>(hexagon);
+                            registry.emplace<FightingHexagon>(hexagon);
                             hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<HexagonAttack>());
                             //?trigger WarStartedEvent?
                         }
@@ -585,10 +589,12 @@ namespace hk {
             for(auto event: m_unprocessedEvents) {
                 if(auto targetRoleComponent = registry.try_get<HexagonRole>(event.target); targetRoleComponent) {
                     if(targetRoleComponent->currentHp < 0.0f) {
-                        auto strikerHexagonComponent = registry.get<Hexagon>(event.striker);
-                        auto targetHexagonComponent = registry.get<Hexagon>(event.target);
+                        Hexagon& strikerHexagonComponent = registry.get<Hexagon>(event.striker);
+                        Hexagon& targetHexagonComponent = registry.get<Hexagon>(event.target);
 
                         targetRoleComponent->currentHp = targetRoleComponent->hp * 0.1f;
+
+                        targetHexagonComponent.team = strikerHexagonComponent.team;
                     }
                 }
             }
@@ -616,14 +622,16 @@ namespace hk {
             floatingText->setPosition(event.position);
             floatingText->setTextColor(event.color);
 
-            float spawningTime = random::random_real(1.0, 1.5);
-            cocos2d::Vec2 spawningEndPosition = cocos2d::Vec2(random::random_real(-0.2, 0.2), 1) * random::random_real(120.0, 150.0);
+            float spawningTime = random::random_real(1.3, 1.7);
+            cocos2d::Vec2 spawningEndPosition = cocos2d::Vec2(random::random_real(-0.2, 0.2), 1) * random::random_real(180.0, 200.0);
 
             auto spawnAction = cocos2d::Spawn::create(cocos2d::MoveBy::create(spawningTime,spawningEndPosition),
                                                       cocos2d::FadeOut::create(spawningTime),
                                                       nullptr);
 
             floatingText->runAction(cocos2d::Sequence::create(spawnAction, cocos2d::RemoveSelf::create(true), nullptr));
+
+            floatingText->setCameraMask((unsigned short)cocos2d::CameraFlag::USER1);
             runningScene->addChild(floatingText, 5);
 
         }

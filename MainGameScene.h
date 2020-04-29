@@ -32,20 +32,30 @@ public:
         }
 
         auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
-        auto hexagonSize = hk::calculateHexSize(24.0f);
 
-        cocos2d::ui::ScrollView* scrollWorldContainer = cocos2d::ui::ScrollView::create();
-        scrollWorldContainer->setEnabled(false);
-        scrollWorldContainer->setContentSize(visibleSize);
-        scrollWorldContainer->setInnerContainerSize(visibleSize * 1.5f);
-        scrollWorldContainer->setDirection(cocos2d::ui::ScrollView::Direction::BOTH);
-        scrollWorldContainer->setScrollBarEnabled(false);
-
-        scrollWorldContainer->setTag(hk::Constants::Tags::ScrollWorldContainer);
-
-        addChild(scrollWorldContainer);
+        cocos2d::Camera* worldCamera = cocos2d::Camera::createOrthographic(visibleSize.width, visibleSize.height, 1.0f, 1000.0f);
+        worldCamera->initDefault();
+        worldCamera->setAnchorPoint(getDefaultCamera()->getAnchorPoint());
+        worldCamera->setPosition(getDefaultCamera()->getPosition());
+        worldCamera->setCameraFlag(cocos2d::CameraFlag::USER1);
+        worldCamera->setTag(hk::Constants::WorldCamera);
+        addChild(worldCamera);
 
         runAction(cocos2d::CallFunc::create(CC_CALLBACK_0(MainGameScene::postInit, this)));
+
+        //TEST
+
+        cocos2d::LayerGradient* gradient = cocos2d::LayerGradient::create(cocos2d::Color4B(128, 128, 128, 255),
+                                                                          cocos2d::Color4B(164, 164, 164, 255),
+                                                                          cocos2d::Vec2(1, 0));
+        gradient->setStartOpacity(220);
+        gradient->setEndOpacity(255);
+        gradient->setAnchorPoint(cocos2d::Vec2::ANCHOR_TOP_LEFT);
+        gradient->setContentSize(cocos2d::Size(visibleSize.width, 24.0f));
+        gradient->setPosition(cocos2d::Vec2(0.0f, visibleSize.height - 24.0f));
+        gradient->setCameraMask((unsigned short)cocos2d::CameraFlag::DEFAULT);
+
+        addChild(gradient);
 
         scheduleUpdate();
         return true;
@@ -95,7 +105,7 @@ public:
             hk::Team team = hk::Team(i);
 
             entt::entity player = registry.create();
-            registry.assign<hk::Player>(player, team);
+            registry.emplace<hk::Player>(player, team);
             gameData.players[team] = player;
         }
 
@@ -114,7 +124,7 @@ public:
                 hk::Hexagon hexagonComponent(cocos2d::Vec2(x, y));
                 hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<hk::HexagonIdle>());
 
-                registry.assign<hk::Hexagon>(hexagon, hexagonComponent);
+                registry.emplace<hk::Hexagon>(hexagon, hexagonComponent);
                 gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
             }
         }
@@ -133,7 +143,7 @@ public:
             }
 
             auto hexagon = gameMap.getHexagon(startPosition);
-            registry.assign<hk::HexagonRole>(hexagon, hk::Role::WORKER, 1);
+            registry.emplace<hk::HexagonRole>(hexagon, hk::Role::WORKER, 1);
             registry.get<hk::Hexagon>(hexagon).team = hk::Team(i);
         }
     }
