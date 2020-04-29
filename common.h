@@ -8,6 +8,7 @@ namespace hk {
             ScrollWorldContainer = 1
         };
 
+        const static char* DEFAULT_FONT = "fonts/arial.ttf";
         const static float BORDER_SIZE = 2.0f;
         const static int UI_LEVEL = 100;
     }

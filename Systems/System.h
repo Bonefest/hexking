@@ -4,7 +4,9 @@
 #include <tuple>
 
 #include "../Dependencies/entt.hpp"
+#include "ui/UIText.h"
 #include "cocos2d.h"
+
 
 
 #include "../Components/Components.h"
@@ -597,6 +599,36 @@ namespace hk {
         float m_elapsedTime;
         std::vector<HexagonDamageCausedEvent> m_unprocessedEvents;
 
+    };
+
+    using random = cocos2d::RandomHelper;
+
+    class FloatingTextSystem: public ISystem {
+    public:
+        virtual void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            dispatcher.sink<CreateFloatTextEvent>().connect<&FloatingTextSystem::onCreateFloatEvent>(*this);
+        }
+
+        void onCreateFloatEvent(const CreateFloatTextEvent& event) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            cocos2d::ui::Text* floatingText = cocos2d::ui::Text::create(event.text, Constants::DEFAULT_FONT, event.size);
+            floatingText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+            floatingText->setPosition(event.position);
+            floatingText->setTextColor(event.color);
+
+            float spawningTime = random::random_real(0.5, 1.0);
+            cocos2d::Vec2 spawningEndPosition = cocos2d::Vec2(random::random_real(-0.5, 0.5), 1) * random::random_real(50.0, 150.0);
+
+            floatingText->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(spawningTime,
+                                                                           spawningEndPosition),
+                                                            cocos2d::FadeOut::create(spawningTime),
+                                                            nullptr));
+
+            runningScene->addChild(floatingText, 5);
+
+        }
+    private:
+        std::vector<CreateFloatTextEvent> m_unprocessedEvents;
     };
 
     class CommandHandlingSystem: public ISystem {

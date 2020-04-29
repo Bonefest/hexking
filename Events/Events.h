@@ -90,6 +90,20 @@ namespace hk {
         entt::entity striker;
     };
 
+    struct CreateFloatTextEvent {
+        CreateFloatTextEvent(const std::string& t_text,
+                             cocos2d::Vec2 t_position,
+                             cocos2d::Color4B t_color,
+                             float t_size): text(t_text),
+                                            position(t_position),
+                                            color(t_color),
+                                            size(t_size) { }
+
+        std::string text;
+        cocos2d::Vec2 position;
+        cocos2d::Color4B color;
+        float size;
+    };
 
 }
 #endif // EVENTS_H_INCLUDED
