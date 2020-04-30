@@ -6,6 +6,7 @@
 
 #include "../HexagonDrawNode.h"
 
+
 namespace hk {
 
     class IHexagonState {
@@ -45,6 +46,9 @@ namespace hk {
         float m_cooldownElapsedTime;
         bool m_attacking;
     };
+
+    struct HexagonRole;
+    float calculateSize(HexagonRole& hexagonRoleComponent);
 }
 
 #endif // STATES_H_INCLUDED

@@ -643,6 +643,39 @@ namespace hk {
         std::vector<CreateFloatTextEvent> m_unprocessedEvents;
     };
 
+    class HUDRenderingSystem: public ISystem {
+    public:
+        void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {
+            auto runningScene = cocos2d::Director::getInstance()->getRunningScene();
+            auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
+
+            m_backgroundLayer = cocos2d::LayerGradient::create(cocos2d::Color4B(128, 128, 128, 255),
+                                                                              cocos2d::Color4B(164, 164, 164, 255),
+                                                                              cocos2d::Vec2(1, 0));
+            m_backgroundLayer->setStartOpacity(220);
+            m_backgroundLayer->setEndOpacity(255);
+            m_backgroundLayer->setAnchorPoint(cocos2d::Vec2::ANCHOR_TOP_LEFT);
+            m_backgroundLayer->setContentSize(cocos2d::Size(visibleSize.width, 24.0f));
+            m_backgroundLayer->setPosition(cocos2d::Vec2(0.0f, visibleSize.height - 24.0f));
+            m_backgroundLayer->setCameraMask((unsigned short)cocos2d::CameraFlag::DEFAULT);
+
+            m_resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 14.0f);
+            m_resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_TOP_LEFT);
+            m_resourcesText->setPositionNormalized(cocos2d::Vec2(1.0f, 1.0f));
+
+            m_backgroundLayer->addChild(m_resourcesText);
+
+
+            runningScene->addChild(m_backgroundLayer);
+        }
+
+    private:
+        cocos2d::LayerGradient* m_backgroundLayer;
+        cocos2d::ui::Text* m_resourcesText;
+        cocos2d::ui::Text* m_nameText;
+        cocos2d::ui::Text* m_teamText;
+    };
+
     class CommandHandlingSystem: public ISystem {
     public:
         void onEnter(entt::registry& registry, entt::dispatcher& dispatcher) {

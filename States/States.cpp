@@ -1,7 +1,6 @@
 #include "States.h"
+
 #include "../Components/Components.h"
-
-
 #include "../Events/Events.h"
 #include "../helper.h"
 #include "../common.h"
@@ -18,7 +17,7 @@ namespace hk {
 
         float hexagonFillSize = gameData.hexagonSize;
         if(auto hexagonRoleComponent = registry.try_get<HexagonRole>(hexagon); hexagonRoleComponent) {
-            hexagonFillSize *=  hexagonRoleComponent->currentHp / hexagonRoleComponent->hp;
+            hexagonFillSize *=  calculateSize(*hexagonRoleComponent);
         }
 
         cocos2d::Color4F fillColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -75,7 +74,7 @@ namespace hk {
             cocos2d::Color4F borderColor = fillColor * 0.5f;
             fillColor.a = borderColor.a = 1.0f;
 
-            float hexagonFillSize = hexagonRoleComponent.currentHp / hexagonRoleComponent.hp * gameData.hexagonSize;
+            float hexagonFillSize = gameData.hexagonSize * calculateSize(hexagonRoleComponent);
             cocos2d::Vec2 hexagonRectPosition = hexToRectCoords(hexagonComponent.position, gameData.hexagonSize);
 
             renderer->drawHexagon(hexagonRectPosition,
@@ -133,7 +132,7 @@ namespace hk {
         cocos2d::Vec2 hexagonRectPosition = hexToRectCoords(hexagonComponent.position, gameData.hexagonSize);
 
         renderer->drawHexagon(hexagonRectPosition,
-                              hexagonSize * hexagonRoleComponent.currentHp / hexagonRoleComponent.hp,
+                              hexagonSize * calculateSize(hexagonRoleComponent),
                               getTeamColor(hexagonComponent.team),
                               cocos2d::Color4F(0, 0, 0, 0),
                               0.0f);
@@ -163,5 +162,9 @@ namespace hk {
             }
         }
 
+    }
+
+    float calculateSize(HexagonRole& hexagonRoleComponent) {
+        return std::max(hexagonRoleComponent.currentHp / hexagonRoleComponent.hp, 0.1f);
     }
 }

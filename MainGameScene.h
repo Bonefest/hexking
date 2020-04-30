@@ -45,17 +45,6 @@ public:
 
         //TEST
 
-        cocos2d::LayerGradient* gradient = cocos2d::LayerGradient::create(cocos2d::Color4B(128, 128, 128, 255),
-                                                                          cocos2d::Color4B(164, 164, 164, 255),
-                                                                          cocos2d::Vec2(1, 0));
-        gradient->setStartOpacity(220);
-        gradient->setEndOpacity(255);
-        gradient->setAnchorPoint(cocos2d::Vec2::ANCHOR_TOP_LEFT);
-        gradient->setContentSize(cocos2d::Size(visibleSize.width, 24.0f));
-        gradient->setPosition(cocos2d::Vec2(0.0f, visibleSize.height - 24.0f));
-        gradient->setCameraMask((unsigned short)cocos2d::CameraFlag::DEFAULT);
-
-        addChild(gradient);
 
         scheduleUpdate();
         return true;
@@ -84,6 +73,7 @@ public:
 
     void initSystems() {
 
+        m_manager.addSystem(std::make_shared<hk::HUDRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::FloatingTextSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonRenderingSystem>(), 1);
         m_manager.addSystem(std::make_shared<hk::HexagonTouchHandleSystem>(), 1);
