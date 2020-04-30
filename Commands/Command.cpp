@@ -114,6 +114,7 @@ namespace hk {
                                float damage) {
         GameData& gameData = registry.ctx<GameData>();
         Hexagon& targetHexagonComponent = registry.get<Hexagon>(target);
+        cocos2d::log("%u %f %f", targetHexagonComponent.team, targetHexagonComponent.position.x, targetHexagonComponent.position.y);
         HexagonRole& hexagonRoleComponent = registry.get<HexagonRole>(target);
         hexagonRoleComponent.currentHp -= damage;
         dispatcher.trigger<HexagonDamageCausedEvent>(target, striker);

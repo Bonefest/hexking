@@ -100,10 +100,6 @@ namespace hk {
         HexagonDrawNode* m_renderer;
         float m_elapsedTime;
 
-        /*
-            ? Loading hexagon vertices once and every frame controlling hexagon size. On resizing - recalculating model. ?
-        */
-
     };
 
     class HexagonUpdatingSystem: public ISystem {
@@ -112,6 +108,14 @@ namespace hk {
             registry.view<Hexagon>().each([&](entt::entity hexagon, Hexagon& hexagonComponent){
                 hexagonComponent.stateOwner.update(registry, dispatcher, hexagon, delta);
             });
+
+            //Regeneration system
+            registry.view<Hexagon, HexagonRole>(entt::exclude<FightingHexagon>).each(
+                [&](entt::entity hexagon, Hexagon& hexagonComponent, HexagonRole& hexagonRoleComponent) {
+                    hexagonRoleComponent.currentHp = std::min<float>(hexagonRoleComponent.currentHp + hexagonRoleComponent.regenerationSpeed * delta,
+                                                                     hexagonRoleComponent.hp);
+                }
+            );
         }
     };
 

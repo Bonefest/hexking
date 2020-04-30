@@ -5,6 +5,7 @@ namespace hk {
     HexagonRole::HexagonRole(Role t_role, int t_level): role(t_role),
                                                             hp(0.0f),
                                                             currentHp(0.0f),
+                                                            regenerationSpeed(0.0f),
                                                             damage(0.0f),
                                                             attackCooldown(0.0f),
                                                             income(0.0f),
@@ -21,6 +22,7 @@ namespace hk {
         switch(hexagonRole.role) {
             case Role::ATTACKER: {
                 hexagonRole.hp = level * 10.0f;
+                hexagonRole.regenerationSpeed = level * 2.0f;
                 hexagonRole.damage = level * 1.0f;
                 hexagonRole.attackCooldown = 1.2f - level * 0.15f;
                 hexagonRole.income = 0.0f;
@@ -29,6 +31,7 @@ namespace hk {
 
             case Role::DEFENDER: {
                 hexagonRole.hp = level * 20.0f;
+                hexagonRole.regenerationSpeed = level * 4.0f;
                 hexagonRole.damage = level * 0.3f;
                 hexagonRole.attackCooldown = 1.6f - level * 0.15f;
                 hexagonRole.income = 0.0f;
@@ -37,6 +40,7 @@ namespace hk {
 
             case Role::WORKER: {
                 hexagonRole.hp = level * 3.0f;
+                hexagonRole.regenerationSpeed = level * 0.8f;
                 hexagonRole.damage = level * 0.1f;
                 hexagonRole.attackCooldown = 2.2f - 0.1f*level;
                 hexagonRole.income = level * 10.0f;

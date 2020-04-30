@@ -14,6 +14,7 @@ namespace hk {
 
         float hp;
         float currentHp;
+        float regenerationSpeed;
 
         float damage;
         float attackCooldown;
