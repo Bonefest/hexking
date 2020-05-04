@@ -43,11 +43,31 @@ namespace hk {
                 hexagonRole.regenerationSpeed = level * 0.8f;
                 hexagonRole.damage = level * 0.1f;
                 hexagonRole.attackCooldown = 2.2f - 0.1f*level;
-                hexagonRole.income = level * 10.0f;
+                hexagonRole.income = level * 2.0f;
                 hexagonRole.incomePeriod = 1.8f - level * 0.15f;
                 break;
             }
         }
+    }
+
+    int calculateHexagonUpgradeValue(HexagonRole& hexagonRole) {
+        switch(hexagonRole.role) {
+        case Role::ATTACKER:
+        case Role::DEFENDER: return int(hexagonRole.level * hexagonRole.level * 7);
+        case Role::WORKER: return int(hexagonRole.level * hexagonRole.level * 5);
+        }
+
+        return 0;
+    }
+
+    int calculateHexagonBuildValue(Role role) {
+        switch(role) {
+        case Role::ATTACKER: return 15;
+        case Role::DEFENDER: return 20;
+        case Role::WORKER: return 10;
+        }
+
+        return 0;
     }
 
     std::string roleToSpriteName(Role role) {

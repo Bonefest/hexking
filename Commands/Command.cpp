@@ -19,15 +19,22 @@ namespace hk {
         Player& player = registry.get<Player>(sender);
 
         if(auto hexagonRole = registry.try_get<HexagonRole>(target); hexagonRole) {
-            //calculate price -> calculateUpgradePrice(role, level);
-            int price = -1;
+
+            GameData& gameData = registry.ctx<GameData>();
+            Hexagon& hexagonComponent = registry.get<Hexagon>(target);
+
+            int price = calculateHexagonUpgradeValue(*hexagonRole);
+
             if(hexagonRole->level >= 1 && hexagonRole->level < 6 && player.resources > price) {
                 hexagonRole->level++;
                 player.resources -= price;
                 calculateHexagonData(*hexagonRole);
 
-                Hexagon& hexagonComponent = registry.get<Hexagon>(target);
                 hexagonComponent.icon->setContentSize(hexagonComponent.icon->getContentSize() * 1.15f);
+            } else if(hexagonRole->level < 6) {
+                dispatcher.trigger<CreateFloatTextEvent>("Not enough money!",
+                                                         hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
+                                                         cocos2d::Color4B::RED, 16.0f);
             }
         }
     }
@@ -43,15 +50,20 @@ namespace hk {
 
         if(!registry.has<Player>(sender)) return;
 
+        GameData& gameData = registry.ctx<GameData>();
         Player& player = registry.get<Player>(sender);
+        Hexagon& hexagonComponent = registry.get<Hexagon>(target);
 
-        int price = -1; //calculate price -> calculatePurchasePrice(role);
+        int price = calculateHexagonBuildValue(m_role);
         if(player.resources >= price) {
             player.resources -= price;
-            registry.assign<HexagonRole>(target, m_role, 1);
+            registry.emplace<HexagonRole>(target, m_role, 1);
 
-            Hexagon& hexagonComponent = registry.get<Hexagon>(target);
             hexagonComponent.team = player.team;
+        } else {
+            dispatcher.trigger<CreateFloatTextEvent>("Not enough money!",
+                                                     hexToRectCoords(hexagonComponent.position, gameData.hexagonSize),
+                                                     cocos2d::Color4B::RED, 16.0f);
         }
     }
 

@@ -471,6 +471,9 @@ namespace hk {
                                                                   hexagonOrigin,
                                                                   gameData.hexagonSize);
 
+                HexagonRole& hexagonRole = registry.get<HexagonRole>(hexagon);
+                upgradeButtonNode->addChild(generatePriceText(calculateHexagonUpgradeValue(hexagonRole)));
+
                 upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, gameData.hexagonSize * 3.0f)),
                                                                     cocos2d::FadeIn::create(0.5f),
                                                                     nullptr));
@@ -492,6 +495,8 @@ namespace hk {
                     HexagonNode* purchaseWorkerButtonNode = createButtonNode(roleToSpriteName(std::get<1>(data)),
                                                                              hexagonOrigin,
                                                                              gameData.hexagonSize);
+
+                    purchaseWorkerButtonNode->addChild(generatePriceText(calculateHexagonBuildValue(std::get<1>(data))));
 
                     purchaseWorkerButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, std::get<0>(data) * gameData.hexagonSize * 3.0f),
                                                                         cocos2d::FadeIn::create(0.5f),
@@ -518,6 +523,18 @@ namespace hk {
             button->addChild(sprite);
             return button;
         }
+
+        cocos2d::ui::Text* generatePriceText(int price) {
+                cocos2d::ui::Text* priceText = cocos2d::ui::Text::create(cocos2d::StringUtils::format("%d", price),
+                                                                         Constants::DEFAULT_FONT,
+                                                                         20.0f);
+                priceText->setColor(cocos2d::Color3B(0, 255, 255));
+                priceText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+                priceText->setPositionY(-40.0f);
+
+                return priceText;
+        }
+
 
         void clearButtons() {
             for(auto button : m_buttons) {
@@ -662,7 +679,7 @@ namespace hk {
             GameData& gameData = registry.ctx<GameData>();
             int counter = 0;
             for(auto player : gameData.players) {
-                auto resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 14.0f);
+                auto resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 18.0f);
                 resourcesText->setColor(cocos2d::Color3B(getTeamColor(player.first)));
                 resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
                 resourcesText->setPositionNormalized(cocos2d::Vec2( 0.6f / (gameData.playersSize - 1) * counter + 0.2f, 0.5f));
