@@ -660,13 +660,20 @@ namespace hk {
             m_backgroundLayer->setCameraMask((unsigned short)cocos2d::CameraFlag::DEFAULT);
 
             m_resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 14.0f);
-            m_resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_TOP_LEFT);
-            m_resourcesText->setPositionNormalized(cocos2d::Vec2(1.0f, 1.0f));
+            m_resourcesText->setColor(cocos2d::Color3B::BLACK);
+            m_resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE_RIGHT);
+            m_resourcesText->setPositionNormalized(cocos2d::Vec2(0.95f, 0.5f));
+
 
             m_backgroundLayer->addChild(m_resourcesText);
-
-
             runningScene->addChild(m_backgroundLayer);
+        }
+
+        void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
+            GameData& gameData = registry.ctx<GameData>();
+            Player& playerComponent = registry.get<Player>(gameData.controllablePlayer);
+
+            m_resourcesText->setString(cocos2d::StringUtils::format("Resources: %04d", playerComponent.resources));
         }
 
     private:
