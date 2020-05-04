@@ -72,6 +72,12 @@ namespace hk {
     };
 
 
+    struct WorkerHasIncome {
+        WorkerHasIncome(entt::entity t_worker): worker(t_worker) { }
+
+        entt::entity worker;
+    };
+
     struct CommandEvent {
         CommandEvent(std::shared_ptr<ICommand> t_command, entt::entity t_target, entt::entity t_sender): command(t_command),
                                                                                                     target(t_target),

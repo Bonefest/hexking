@@ -27,6 +27,9 @@ namespace hk {
     };
 
     void calculateHexagonData(HexagonRole& hexagonRole);
+    float calculateHexagonImproveValue(HexagonRole& hexagonRole);
+    float calculateHexagonBuildSize(Role role);
+
     std::string roleToSpriteName(Role role);
 }
 

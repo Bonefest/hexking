@@ -659,26 +659,36 @@ namespace hk {
             m_backgroundLayer->setPosition(cocos2d::Vec2(0.0f, visibleSize.height - 24.0f));
             m_backgroundLayer->setCameraMask((unsigned short)cocos2d::CameraFlag::DEFAULT);
 
-            m_resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 14.0f);
-            m_resourcesText->setColor(cocos2d::Color3B::BLACK);
-            m_resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE_RIGHT);
-            m_resourcesText->setPositionNormalized(cocos2d::Vec2(0.95f, 0.5f));
+            GameData& gameData = registry.ctx<GameData>();
+            int counter = 0;
+            for(auto player : gameData.players) {
+                auto resourcesText = cocos2d::ui::Text::create("Resources: 0", Constants::DEFAULT_FONT, 14.0f);
+                resourcesText->setColor(cocos2d::Color3B(getTeamColor(player.first)));
+                resourcesText->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+                resourcesText->setPositionNormalized(cocos2d::Vec2( 0.6f / (gameData.playersSize - 1) * counter + 0.2f, 0.5f));
 
+                m_backgroundLayer->addChild(resourcesText);
+                m_playersResourcesTexts.emplace_back(player.second, resourcesText);
+                counter++;
+            }
 
-            m_backgroundLayer->addChild(m_resourcesText);
             runningScene->addChild(m_backgroundLayer);
         }
 
         void update(entt::registry& registry, entt::dispatcher& dispatcher, float delta) {
             GameData& gameData = registry.ctx<GameData>();
             Player& playerComponent = registry.get<Player>(gameData.controllablePlayer);
+            for(auto playerText: m_playersResourcesTexts) {
+                Player& playerComponent = registry.get<Player>(playerText.first);
 
-            m_resourcesText->setString(cocos2d::StringUtils::format("Resources: %04d", playerComponent.resources));
+                const char* format = (playerComponent.team == gameData.controllableTeam) ? "(YOU)Resources: %04d" : "Resources: %04d";
+                playerText.second->setString(cocos2d::StringUtils::format(format, playerComponent.resources));
+            }
         }
 
     private:
         cocos2d::LayerGradient* m_backgroundLayer;
-        cocos2d::ui::Text* m_resourcesText;
+        std::vector<std::pair<entt::entity, cocos2d::ui::Text*> > m_playersResourcesTexts;
         cocos2d::ui::Text* m_nameText;
         cocos2d::ui::Text* m_teamText;
     };

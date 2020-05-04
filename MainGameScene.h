@@ -53,8 +53,8 @@ public:
 
     void postInit() {
         initContext();
+        generatePlayers(4);
         initSystems();
-        generatePlayers(2);
         generateGrid();
 
 

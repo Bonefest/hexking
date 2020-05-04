@@ -100,7 +100,13 @@ namespace hk {
             if(hexagonRole->role != Role::WORKER) return;
 
             if(m_elapsedTime > hexagonRole->incomePeriod) {
-                //dispatcher.trigger<onWorkerHasIncome>(hexagon);
+                //dispatcher.trigger<WorkerHasIncome>(hexagon);
+
+                GameData& gameData = registry.ctx<GameData>();
+                Hexagon& hexagonComponent = registry.get<Hexagon>(hexagon);
+                Player& playerComponent = registry.get<Player>(gameData.players[hexagonComponent.team]);
+                playerComponent.resources += hexagonRole->income;
+
                 m_elapsedTime = 0.0f;
             }
         }
