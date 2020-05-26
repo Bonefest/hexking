@@ -466,12 +466,14 @@ namespace hk {
             cocos2d::Vec2 hexagonOrigin = hexToRectCoords(hexagonComponent.position, gameData.hexagonSize);
 
             if(registry.has<HexagonRole>(hexagon)) {
+                HexagonRole& hexagonRole = registry.get<HexagonRole>(hexagon);
+                if(hexagonRole.level >= 6) return;
 
                 HexagonNode* upgradeButtonNode = createButtonNode("upgrade.png",
                                                                   hexagonOrigin,
                                                                   gameData.hexagonSize);
 
-                HexagonRole& hexagonRole = registry.get<HexagonRole>(hexagon);
+
                 upgradeButtonNode->addChild(generatePriceText(calculateHexagonUpgradeValue(hexagonRole)));
 
                 upgradeButtonNode->runAction(cocos2d::Spawn::create(cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0, gameData.hexagonSize * 3.0f)),

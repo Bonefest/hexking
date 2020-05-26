@@ -43,8 +43,8 @@ namespace hk {
                 hexagonRole.regenerationSpeed = level * 0.8f;
                 hexagonRole.damage = level * 0.1f;
                 hexagonRole.attackCooldown = 2.2f - 0.1f*level;
-                hexagonRole.income = level * 2.0f;
-                hexagonRole.incomePeriod = 1.8f - level * 0.15f;
+                hexagonRole.income = level * 1.0f;
+                hexagonRole.incomePeriod = 2.0f - (level - 1) * 0.2f;
                 break;
             }
         }

@@ -19,6 +19,8 @@
 
 #include "HexagonRenderer.h"
 
+#include "MapGenerator.h"
+
 class MainGameScene: public cocos2d::Scene {
 public:
     CREATE_FUNC(MainGameScene);
@@ -105,19 +107,21 @@ public:
 
     void generateGrid() {
         auto& registry = m_manager.getRegistry();
+        hk::MapSymmetricGenerator generator;
         hk::GameMap& gameMap = registry.ctx<hk::GameMap>();
-        for(int y = 0;y < 16;y++) {
-            for(int x = 0;x <16;x++) {
-                if(rand() % 2) continue;
-
-                entt::entity hexagon = registry.create();
-                hk::Hexagon hexagonComponent(cocos2d::Vec2(x, y));
-                hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<hk::HexagonIdle>());
-
-                registry.emplace<hk::Hexagon>(hexagon, hexagonComponent);
-                gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
-            }
-        }
+        gameMap = generator.generateMap(registry);
+//        for(int y = 0;y < 16;y++) {
+//            for(int x = 0;x <16;x++) {
+//                if(rand() % 2) continue;
+//
+//                entt::entity hexagon = registry.create();
+//                hk::Hexagon hexagonComponent(cocos2d::Vec2(x, y));
+//                hexagonComponent.stateOwner.setState(registry, hexagon, std::make_shared<hk::HexagonIdle>());
+//
+//                registry.emplace<hk::Hexagon>(hexagon, hexagonComponent);
+//                gameMap.setHexagon(cocos2d::Vec2(x, y), hexagon);
+//            }
+//        }
 
         //Generating players starting hexagons
         auto isAvailablePosition = [&](cocos2d::Vec2 position)->bool {
