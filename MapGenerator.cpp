@@ -6,8 +6,8 @@ namespace hk {
 
     GameMap MapSymmetricGenerator::generateMap(entt::registry& registry) {
 
-        int32_t max_q = 16, max_r = 16;
-        GameMap generatedMap(map_size{max_q * 2, max_r * 2});
+        int32_t max_q = 8, max_r = 8;
+        GameMap generatedMap(map_size{max_q * 4, max_r * 4});
 
         std::vector<cocos2d::Vec2> generatedPart;
 
@@ -17,7 +17,6 @@ namespace hk {
         uint32_t direction = 0;
 
         auto is_available = [&](int32_t q, int32_t r)->bool {
-            cocos2d::log("%d %d %d %d", q, r, -max_q, max_q);
             if(r >= 0 && r <= max_r && q >= -max_q && q <= max_q) {
 
                     return true;
@@ -95,7 +94,7 @@ namespace hk {
         }
 
         for(cocos2d::Vec2 pos: generatedPart) {
-            cocos2d::Vec2 resPos = cocos2d::Vec2(max_q, max_r) + pos;
+            cocos2d::Vec2 resPos = pos;
             if(!generatedMap.hasHexagon(resPos)) {
                 auto hexagon = registry.create();
                 Hexagon hexagonComponent(resPos);
@@ -105,7 +104,9 @@ namespace hk {
 
                 cocos2d::log("%f %f", resPos.x, resPos.y);
 
-                cocos2d::Vec2 symmPos = cocos2d::Vec2(max_q, max_r) - pos;
+                cocos2d::Vec2 symmPos = cocos2d::Vec2(resPos.x, -resPos.y);
+                if(symmPos == resPos) continue;
+
                 auto symmHexagon = registry.create();
                 Hexagon symmHexagonComponent(symmPos);
                 symmHexagonComponent.stateOwner.setState(registry, symmHexagon, std::make_shared<hk::HexagonIdle>());
